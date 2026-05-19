@@ -150,6 +150,9 @@ body{font-family:"Noto Serif SC","STSong","SimSun","KaiTi",serif;background:line
     <button class="btn btn-o" onclick="searchPerson()">查找成员</button>
     <button class="btn btn-p" onclick="handleAdd(null)">+ 添加先祖</button>
     <a href="family-memory.html" class="btn btn-o" style="text-decoration:none">&#128220; 家族记忆</a>
+    <button class="btn btn-o" onclick="exportData()">&#128190; 导出数据</button>
+    <button class="btn btn-o" onclick="document.getElementById('importFile').click()">&#128194; 导入数据</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
   </div>
 </div>
 <div class="main-wrap">
@@ -197,6 +200,43 @@ function loadData() {
   return JSON.parse(JSON.stringify(DEFAULT_DATA));
 }
 function saveData() { localStorage.setItem(SK, JSON.stringify(familyData)); }
+
+function exportData() {
+  var blob = new Blob([JSON.stringify(familyData, null, 2)], {type: 'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '东郭程氏族谱_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      var d = JSON.parse(ev.target.result);
+      if (!d || !d.people || !Array.isArray(d.people)) {
+        alert('数据格式错误：缺少 people 数组');
+        return;
+      }
+      if (!confirm('导入将覆盖当前所有数据，共 ' + d.people.length + ' 人。确认导入？')) return;
+      familyData = d;
+      saveData();
+      selectedId = null;
+      closePanel();
+      buildTree();
+      renderTree();
+      alert('导入成功！共 ' + d.people.length + ' 人');
+    } catch(err) {
+      alert('文件解析失败：' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
 
 var NW = 140, NH = 52, LG = 220, SG = 8, RG = 50, LP = 60, TP = 40;
 
