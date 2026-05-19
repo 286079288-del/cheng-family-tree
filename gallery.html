@@ -92,6 +92,38 @@ body{font-family:"Noto Serif SC","STSong","SimSun",serif;background:linear-gradi
   <div class="lightbox-caption" id="lbCaption"></div>
 </div>
 
+<!-- Upload Dialog -->
+<div id="uploadDialog" style="display:none;position:fixed;inset:0;background:rgba(60,50,35,0.5);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:#faf6ee;border-radius:14px;padding:24px;width:92%;max-width:440px;box-shadow:0 20px 50px rgba(100,70,40,0.25);border:1px solid #d4c5a0">
+    <h3 style="font-size:16px;margin-bottom:16px;text-align:center;letter-spacing:3px;color:#5a3a1a">添加照片</h3>
+    
+    <div style="text-align:center;margin-bottom:14px">
+      <div id="uploadPreview" style="width:200px;height:150px;border-radius:10px;border:2px dashed rgba(184,131,58,0.25);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;color:#8a7b68;font-size:12px;background-color:rgba(255,255,255,0.3)">预览</div>
+      <label style="display:inline-block;padding:6px 16px;border-radius:6px;background:linear-gradient(135deg,#b8833a,#9a6a28);color:#fff;font-size:12px;cursor:pointer;font-weight:600;letter-spacing:1px">
+        选择本地照片
+        <input type="file" id="uploadFileInput" accept="image/*" style="display:none" onchange="handleFileSelect(event)">
+      </label>
+    </div>
+    
+    <div style="text-align:center;margin-bottom:14px;color:#8a7b68;font-size:11px;letter-spacing:1px">— 或输入网络地址 —</div>
+    
+    <div style="margin-bottom:12px">
+      <label style="display:block;font-size:10px;color:#8a7b68;margin-bottom:3px;letter-spacing:1px">照片URL</label>
+      <input id="uploadUrlInput" type="url" placeholder="https://example.com/photo.jpg" style="width:100%;padding:8px 10px;border:1px solid #d4c5a0;border-radius:6px;background:#fffef9;font-family:inherit;font-size:12px;color:#3d2e20" oninput="document.getElementById('uploadPreview').dataset.dataUrl='';document.getElementById('uploadPreview').style.backgroundImage='';document.getElementById('uploadPreview').textContent='预览'">
+    </div>
+    
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:10px;color:#8a7b68;margin-bottom:3px;letter-spacing:1px">照片描述</label>
+      <input id="uploadCaption" type="text" placeholder="给照片写个说明" style="width:100%;padding:8px 10px;border:1px solid #d4c5a0;border-radius:6px;background:#fffef9;font-family:inherit;font-size:12px;color:#3d2e20">
+    </div>
+    
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-o" onclick="closeUploadDialog()">取消</button>
+      <button class="btn btn-p" onclick="confirmAddPhoto()">确认添加</button>
+    </div>
+  </div>
+</div>
+
 <script>
 var SK = 'cheng_family_photos_v1';
 
@@ -117,6 +149,7 @@ var defaultPhotos = {
 var photos = {};
 var lbIndex = 0;
 var lbArray = [];
+var pendingCat = null; // track which category to add photo to
 
 function loadPhotos() {
   try {
@@ -170,12 +203,51 @@ function esc(s) {
 }
 
 function addPhoto(cat) {
-  var url = prompt('请输入照片URL（或Base64）：');
-  if (!url) return;
-  var caption = prompt('照片描述：') || '';
-  if (!photos[cat]) photos[cat] = [];
-  photos[cat].push({url:url, caption:caption});
+  pendingCat = cat;
+  // Show upload dialog
+  document.getElementById('uploadDialog').style.display = 'flex';
+}
+function closeUploadDialog() {
+  document.getElementById('uploadDialog').style.display = 'none';
+  document.getElementById('uploadFileInput').value = '';
+  document.getElementById('uploadCaption').value = '';
+  document.getElementById('uploadUrlInput').value = '';
+  pendingCat = null;
+}
+function handleFileSelect(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 5*1024*1024) { alert('照片不超过5MB'); return; }
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    document.getElementById('uploadPreview').style.backgroundImage = 'url('+ev.target.result+')';
+    document.getElementById('uploadPreview').textContent = '';
+    document.getElementById('uploadPreview').dataset.dataUrl = ev.target.result;
+    document.getElementById('uploadUrlInput').value = '';
+    document.getElementById('uploadUrlInput').disabled = true;
+  };
+  reader.readAsDataURL(file);
+}
+function switchToUrlMode() {
+  document.getElementById('uploadFileInput').value = '';
+  document.getElementById('uploadPreview').style.backgroundImage = '';
+  document.getElementById('uploadPreview').textContent = '预览';
+  document.getElementById('uploadPreview').dataset.dataUrl = '';
+  document.getElementById('uploadUrlInput').disabled = false;
+}
+function confirmAddPhoto() {
+  if (!pendingCat) return;
+  var caption = document.getElementById('uploadCaption').value.trim() || '';
+  var dataUrl = document.getElementById('uploadPreview').dataset.dataUrl || '';
+  var url = document.getElementById('uploadUrlInput').value.trim();
+  
+  var photoUrl = dataUrl || url;
+  if (!photoUrl) { alert('请选择照片文件或输入URL'); return; }
+  
+  if (!photos[pendingCat]) photos[pendingCat] = [];
+  photos[pendingCat].push({url: photoUrl, caption: caption});
   savePhotos();
+  closeUploadDialog();
   render();
 }
 
