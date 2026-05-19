@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>东郭程氏老家 - 全景浏览</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+<style>
+:root{--gold:#b8833a;--text:#3d3025;--bg:#f0e6d0}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Noto Serif SC","STSong","SimSun",serif;background:var(--bg);overflow:hidden}
+
+.topbar{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(255,253,248,0.9);backdrop-filter:blur(14px);border-bottom:1px solid rgba(184,131,58,0.2);padding:8px 16px;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:16px;letter-spacing:3px;color:var(--text);display:flex;align-items:center;gap:8px}
+.topbar h1 .seal{width:30px;height:30px;border:2px solid var(--gold);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--gold);font-weight:700}
+.btn{padding:5px 12px;border-radius:5px;cursor:pointer;font-family:inherit;font-size:11px;letter-spacing:1px;border:none;background:rgba(184,131,58,0.08);color:var(--text);border:1px solid rgba(184,131,58,0.18);text-decoration:none;display:inline-block}
+.btn:hover{background:rgba(184,131,58,0.15);color:var(--gold)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#9a6a28);color:#fff;font-weight:600;border:none}
+.btn-gold:hover{background:linear-gradient(135deg,#d4a860,var(--gold))}
+
+#panorama{width:100vw;height:100vh}
+
+.scene-picker{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:200;display:flex;gap:8px;background:rgba(255,253,248,0.92);backdrop-filter:blur(10px);padding:8px 14px;border-radius:20px;border:1px solid rgba(184,131,58,0.2);box-shadow:0 4px 16px rgba(100,70,40,0.1)}
+.scene-btn{padding:5px 14px;border-radius:14px;border:none;cursor:pointer;font-family:inherit;font-size:11px;letter-spacing:1px;background:transparent;color:var(--text-light);transition:all .2s;white-space:nowrap}
+.scene-btn:hover{color:var(--gold)}
+.scene-btn.active{background:linear-gradient(135deg,var(--gold),#9a6a28);color:#fff;font-weight:600}
+
+.vr-hint{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:200;background:rgba(255,253,248,0.92);backdrop-filter:blur(8px);padding:6px 14px;border-radius:20px;font-size:11px;color:var(--text-light);border:1px solid rgba(184,131,58,0.15);display:none}
+.vr-hint.show{display:block;animation:fadeIn .5s}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1><span class="seal">程</span>老家全景</h1>
+  <div>
+    <button class="btn" onclick="toggleFullscreen()">&#9974; 全屏</button>
+    <a href="index.html" class="btn" style="text-decoration:none">&#8592; 家谱</a>
+  </div>
+</div>
+
+<div class="vr-hint" id="vrHint">&#127776; 拖动鼠标浏览全景，点击热点跳转</div>
+
+<div id="panorama"></div>
+
+<div class="scene-picker" id="scenePicker"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+<script>
+// Scene configuration - replace panorama URLs with your 360 photos
+var scenes = {
+  courtyard: {
+    title: '老家院子',
+    panorama: '', // Add your 360 photo URL here
+    hotSpots: [
+      {pitch: -5, yaw: 30, type: 'info', text: '正房大门'},
+      {pitch: -3, yaw: -60, type: 'info', text: '东侧厢房'},
+      {pitch: -3, yaw: 120, type: 'info', text: '西侧厢房'},
+      {pitch: -8, yaw: 180, type: 'info', text: '院门入口'}
+    ]
+  },
+  mainhall: {
+    title: '正房堂屋',
+    panorama: '', // Add your 360 photo URL here
+    hotSpots: [
+      {pitch: -5, yaw: 0, type: 'info', text: '祖先牌位'},
+      {pitch: -3, yaw: 90, type: 'info', text: '东侧房间'},
+      {pitch: -3, yaw: -90, type: 'info', text: '西侧房间'}
+    ]
+  },
+  gate: {
+    title: '村口老门',
+    panorama: '', // Add your 360 photo URL here
+    hotSpots: [
+      {pitch: -5, yaw: 0, type: 'info', text: '东郭村村碑'},
+      {pitch: -3, yaw: 45, type: 'info', text: '进村道路'}
+    ]
+  },
+  farmland: {
+    title: '祖上田地',
+    panorama: '', // Add your 360 photo URL here
+    hotSpots: [
+      {pitch: -8, yaw: 0, type: 'info', text: '程家老井'},
+      {pitch: -5, yaw: 120, type: 'info', text: '庄稼地'}
+    ]
+  }
+};
+
+var viewer;
+var currentScene = 'courtyard';
+
+function initViewer() {
+  var config = {
+    default: { firstScene: currentScene, sceneFadeDuration: 800 },
+    scenes: {}
+  };
+
+  for (var key in scenes) {
+    var s = scenes[key];
+    config.scenes[key] = {
+      title: s.title,
+      hfov: 120,
+      pitch: 0,
+      yaw: 0,
+      type: 'equirectangular',
+      panorama: s.panorama || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIyIiBoZWlnaHQ9IjEiIGZpbGw9IiNmMGVhZDAiLz48L3N2Zz4=',
+      hotSpots: s.hotSpots || []
+    };
+  }
+
+  viewer = pannellum.viewer('panorama', config);
+
+  // Show hint on first load
+  setTimeout(function(){
+    document.getElementById('vrHint').classList.add('show');
+    setTimeout(function(){document.getElementById('vrHint').classList.remove('show');}, 5000);
+  }, 1000);
+}
+
+function buildScenePicker() {
+  var picker = document.getElementById('scenePicker');
+  var html = '';
+  for (var key in scenes) {
+    var active = key === currentScene ? 'active' : '';
+    html += '<button class="scene-btn ' + active + '" onclick="switchScene(\'' + key + '\')">' + scenes[key].title + '</button>';
+  }
+  picker.innerHTML = html;
+}
+
+function switchScene(key) {
+  currentScene = key;
+  if (viewer) viewer.loadScene(key);
+  buildScenePicker();
+}
+
+function toggleFullscreen() {
+  var el = document.documentElement;
+  if (!document.fullscreenElement) {
+    el.requestFullscreen && el.requestFullscreen();
+  } else {
+    document.exitFullscreen && document.exitFullscreen();
+  }
+}
+
+initViewer();
+buildScenePicker();
+</script>
+
+</body>
+</html>

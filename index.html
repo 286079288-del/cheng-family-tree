@@ -128,6 +128,32 @@ body{font-family:"Noto Serif SC","STSong","SimSun","KaiTi",serif;background:line
 .ld.d0{background:linear-gradient(135deg,#5a3a1a,#7a5030)}.ld.d1{background:linear-gradient(135deg,#7a5830,#9a7048)}.ld.d2{background:linear-gradient(135deg,#f8f0e0,#fff8f0);border:1px solid rgba(184,131,58,0.25)}.ld.d3{background:linear-gradient(135deg,#faf4e4,#fffaf0);border:1px solid rgba(184,131,58,0.2)}.ld.d4{background:linear-gradient(135deg,#fcf8f0,#fffcf5);border:1px solid rgba(184,131,58,0.18)}
 .stats{position:fixed;bottom:10px;right:10px;z-index:50;background:rgba(255,253,248,0.92);backdrop-filter:blur(8px);border:1px solid rgba(184,131,58,0.15);border-radius:8px;padding:6px 14px;font-size:10px;color:var(--text-light)}
 
+/* View tabs */
+.view-tabs{display:flex;justify-content:center;gap:0;padding:8px 0;background:rgba(255,253,248,0.85);backdrop-filter:blur(10px);border-bottom:1px solid rgba(184,131,58,0.12);position:sticky;top:46px;z-index:99}
+.view-tab{padding:5px 18px;border:none;background:transparent;cursor:pointer;font-family:inherit;font-size:12px;letter-spacing:1px;color:var(--text-light);border-radius:16px;transition:all .2s}
+.view-tab:hover{color:var(--gold)}
+.view-tab.active{background:linear-gradient(135deg,var(--gold),#9a6a28);color:#fff;font-weight:600}
+
+/* List view */
+.list-view{flex:1;overflow-y:auto;padding:20px 30px;background:linear-gradient(180deg,var(--bg-grad),var(--bg));min-height:calc(100vh - 90px)}
+.gen-section{margin-bottom:28px}
+.gen-title{font-size:15px;font-weight:700;color:#5a3a1a;letter-spacing:3px;margin-bottom:14px;padding-left:8px;border-left:3px solid var(--gold)}
+.gen-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.list-card{background:#fff;border:1px solid rgba(184,131,58,0.15);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .2s;box-shadow:0 1px 4px rgba(100,70,40,0.04)}
+.list-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(100,70,40,0.08);border-color:rgba(184,131,58,0.3)}
+.list-card-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.list-card-avt{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:bold;flex-shrink:0;border:2px solid rgba(255,255,255,0.6);box-shadow:0 2px 6px rgba(100,70,40,0.1)}
+.list-card-avt.m{background:linear-gradient(135deg,#5a7a98,#7a98b0)}
+.list-card-avt.f{background:linear-gradient(135deg,#985a7a,#b07a98)}
+.list-card-name{font-size:14px;font-weight:700;color:#3d3025;letter-spacing:1px}
+.list-card-meta{font-size:10px;color:var(--text-light);margin-top:2px}
+.list-card-relations{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;font-size:11px}
+.list-card-relations .rel-label{color:var(--text-light);margin-right:2px}
+.list-card-relations .rel-name{color:var(--gold);cursor:pointer}
+.list-card-relations .rel-name:hover{text-decoration:underline}
+.list-card-desc{font-size:11px;color:#6a5a4a;line-height:1.6;margin-top:8px;padding-top:8px;border-top:1px dashed rgba(184,131,58,0.12)}
+.list-card-dates{font-size:10px;color:var(--text-light);margin-top:6px;display:flex;align-items:center;gap:4px}
+
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
@@ -149,18 +175,25 @@ body{font-family:"Noto Serif SC","STSong","SimSun","KaiTi",serif;background:line
     <button class="btn btn-o" onclick="collapseDeep()">收起深层</button>
     <button class="btn btn-o" onclick="searchPerson()">查找成员</button>
     <button class="btn btn-p" onclick="handleAdd(null)">+ 添加先祖</button>
+    <a href="vr.html" class="btn btn-o" style="text-decoration:none">&#127775; 全景</a>
+    <a href="gallery.html" class="btn btn-o" style="text-decoration:none">&#128444; 照片墙</a>
     <a href="family-memory.html" class="btn btn-o" style="text-decoration:none">&#128220; 家族记忆</a>
     <button class="btn btn-o" onclick="exportData()">&#128190; 导出数据</button>
     <button class="btn btn-o" onclick="document.getElementById('importFile').click()">&#128194; 导入数据</button>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
   </div>
 </div>
-<div class="main-wrap">
+<div class="view-tabs" id="viewTabs">
+  <button class="view-tab active" onclick="switchView('tree')" id="tabTree">&#127795; 树状视图</button>
+  <button class="view-tab" onclick="switchView('list')" id="tabList">&#128196; 列表视图</button>
+</div>
+<div class="main-wrap" id="mainWrap">
   <div class="tree-area" id="treeArea">
     <div class="tree-container" id="treeContainer">
       <svg class="lines-svg" id="linesSvg"></svg>
     </div>
   </div>
+  <div class="list-view" id="listView" style="display:none"></div>
   <div class="detail-panel" id="detailPanel">
     <div class="ph"><h3 id="panelTitle">家族成员</h3><button class="pclose" onclick="closePanel()">&#10005;</button></div>
     <div class="pb" id="panelBody"><div class="empty"><span class="ico">&#128100;</span><p>点击人物查看详情</p></div></div>
@@ -360,6 +393,85 @@ function calcLayout() {
   return {nodes: nodes, conns: conns, w: mxX, h: mxY};
 }
 
+var currentView = 'tree';
+function switchView(v) {
+  currentView = v;
+  document.getElementById('tabTree').classList.toggle('active', v === 'tree');
+  document.getElementById('tabList').classList.toggle('active', v === 'list');
+  document.getElementById('treeArea').style.display = v === 'tree' ? 'block' : 'none';
+  document.getElementById('listView').style.display = v === 'list' ? 'block' : 'none';
+  if (v === 'tree') render();
+  else renderListView();
+}
+
+function renderListView() {
+  var container = document.getElementById('listView');
+  var map = {};
+  familyData.people.forEach(function(p) { map[p.id] = p; });
+
+  // Group by generation (depth)
+  var t = buildTree();
+  var gens = {};
+  function walk(nd, dep) {
+    nd.depth = dep;
+    if (!nd.isVirtual) {
+      if (!gens[dep]) gens[dep] = [];
+      gens[dep].push(nd);
+    }
+    if (nd.children) nd.children.forEach(function(c) { walk(c, dep+1); });
+  }
+  walk(t.map.__vroot__ || {isVirtual:true, children:t.roots, depth:-1}, 0);
+
+  var genNames = ['始祖','第一代','第二代','第三代','第四代','第五代','第六代','第七代','第八代','第九代','第十代'];
+  var html = '';
+  Object.keys(gens).sort(function(a,b){return +a-+b;}).forEach(function(g) {
+    var people = gens[g];
+    var title = genNames[g] || '第' + g + '代';
+    html += '<div class="gen-section">';
+    html += '<div class="gen-title">' + title + ' <span style="font-size:11px;color:var(--text-light);font-weight:400">(' + people.length + '人)</span></div>';
+    html += '<div class="gen-cards">';
+    people.forEach(function(p) {
+      var sym = p.gender === 'male' ? '\u2642' : '\u2640';
+      var avtClass = p.gender === 'male' ? 'm' : 'f';
+      var spouse = p.spouse || '';
+      var children = familyData.people.filter(function(ch){return ch.parentId === p.id;});
+      var birth = p.birth || '', death = p.death || '';
+      var dates = birth || death ? (birth + (death ? ' - ' + death : '')) : '';
+
+      html += '<div class="list-card" onclick="selectPerson(\''+p.id+'\')">';
+      html += '<div class="list-card-header">';
+      html += '<div class="list-card-avt '+avtClass+'">'+sym+'</div>';
+      html += '<div><div class="list-card-name">'+esc(p.name)+'</div>';
+      if (spouse) html += '<div class="list-card-meta">\u2665 '+esc(spouse)+'</div>';
+      html += '</div></div>';
+
+      html += '<div class="list-card-relations">';
+      if (p.parentId && map[p.parentId]) {
+        html += '<span><span class="rel-label">\u7236\u4eb2\uff1a</span><span class="rel-name" onclick="event.stopPropagation();selectPerson(\''+p.parentId+'\')">'+esc(map[p.parentId].name)+'</span></span>';
+      }
+      if (children.length) {
+        html += '<span><span class="rel-label">\u5b50\u55e3\uff1a</span>';
+        children.forEach(function(ch, i) {
+          html += '<span class="rel-name" onclick="event.stopPropagation();selectPerson(\''+ch.id+'\')">'+esc(ch.name)+'</span>' + (i < children.length-1 ? '\u3001' : '');
+        });
+        html += '</span>';
+      }
+      html += '</div>';
+
+      if (p.notes || p.residence || p.occupation) {
+        var desc = p.notes || '';
+        html += '<div class="list-card-desc">'+esc(desc)+'</div>';
+      }
+      if (dates) {
+        html += '<div class="list-card-dates">&#128197; '+dates+'</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+  container.innerHTML = html;
+}
+
 function render() {
   var cont = document.getElementById('treeContainer');
   var svg = document.getElementById('linesSvg');
@@ -387,29 +499,34 @@ function render() {
 
   // Draw SVG lines
   var paths = '';
-  // SVG defs - warm brown gradient & subtle shadow
+  // SVG defs - warm brown gradient & shadow for visible lines
   var defs = '<defs>';
-  defs += '<filter id="warmShadow"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="rgba(100,70,40,0.08)"/></filter>';
-  defs += '<linearGradient id="warmLine" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#b8833a" stop-opacity="0.5"/><stop offset="100%" stop-color="#b8833a" stop-opacity="0.15"/></linearGradient>';
+  defs += '<filter id="lineShadow"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="rgba(100,70,40,0.12)"/></filter>';
   defs += '</defs>';
 
+  function roundedPath(x1, y1, x2, y2, r) {
+    // Horizontal-right then vertical then horizontal-right, with rounded corners
+    var midX = x1 + (x2 - x1) * 0.55;
+    var dirY = y2 > y1 ? 1 : -1;
+    if (Math.abs(y1 - y2) < 2) {
+      return 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2;
+    }
+    return 'M' + x1 + ',' + y1 +
+      ' L' + (midX - r) + ',' + y1 +
+      ' Q' + midX + ',' + y1 + ' ' + midX + ',' + (y1 + r * dirY) +
+      ' L' + midX + ',' + (y2 - r * dirY) +
+      ' Q' + midX + ',' + y2 + ' ' + (midX + r) + ',' + y2 +
+      ' L' + x2 + ',' + y2;
+  }
+
   conns.forEach(function(c) {
-    var mx = (c.x1 + c.x2) / 2;
+    var d = roundedPath(c.x1, c.y1, c.x2, c.y2, 10);
     if (c.isRoot) {
-      // Warm brown polyline for root connections
-      var r = 8;
-      var x1=c.x1, y1=c.y1, x2=c.x2, y2=c.y2;
-      var xMid = mx;
-      if (Math.abs(y1-y2) < 2) {
-        paths += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="url(#warmLine)" stroke-width="2" stroke-linecap="round" filter="url(#warmShadow)"/>';
-      } else {
-        paths += '<path d="M'+x1+','+y1+' L'+(xMid-r)+','+y1+' Q'+xMid+','+y1+' '+xMid+','+(y1<y2?y1+r:y1-r)+' L'+xMid+','+(y2<y1?y2+r:y2-r)+' Q'+xMid+','+y2+' '+(xMid+r)+','+y2+' L'+x2+','+y2+'" fill="none" stroke="url(#warmLine)" stroke-width="2" stroke-linecap="round" filter="url(#warmShadow)"/>';
-      }
+      // Root connections: thicker gold line
+      paths += '<path d="' + d + '" fill="none" stroke="#b8833a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#lineShadow)" opacity="0.7"/>';
     } else {
-      // Subtle warm bezier for child connections
-      var diff = Math.abs(y1 - y2);
-      var opacity = diff < 20 ? 0.3 : 0.18;
-      paths += '<path d="M'+c.x1+','+c.y1+' C'+(c.x1+40)+','+c.y1+' '+(c.x2-40)+','+c.y2+' '+c.x2+','+c.y2+'" fill="none" stroke="rgba(184,131,58,'+opacity+')" stroke-width="1.2" stroke-linecap="round"/>';
+      // Child connections: same style but slightly thinner
+      paths += '<path d="' + d + '" fill="none" stroke="#c4954a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#lineShadow)" opacity="0.55"/>';
     }
   });
   svg.innerHTML = defs + paths;

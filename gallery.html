@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>东郭程氏 - 家族照片墙</title>
+<style>
+:root{--gold:#b8833a;--gold-light:#d4a860;--text:#3d3025;--text-light:#8a7b68;--bg:#f0e6d0;--bg-grad:#f5efe0}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Noto Serif SC","STSong","SimSun",serif;background:linear-gradient(180deg,var(--bg-grad),var(--bg));color:var(--text);min-height:100vh}
+
+.topbar{background:rgba(255,255,255,0.25);backdrop-filter:blur(14px);border-bottom:1px solid rgba(200,180,150,0.3);padding:8px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.topbar h1{font-size:16px;letter-spacing:5px;display:flex;align-items:center;gap:10px;color:var(--text)}
+.topbar h1 .seal{width:30px;height:30px;border:2px solid var(--gold);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--gold);font-weight:700;background:rgba(184,131,58,0.08)}
+.topbar-actions{display:flex;gap:6px;flex-wrap:wrap}
+.btn{padding:5px 12px;border-radius:5px;cursor:pointer;font-family:inherit;font-size:11px;letter-spacing:1px;transition:all .2s;border:none}
+.btn-o{background:rgba(184,131,58,0.06);color:var(--text-light);border:1px solid rgba(184,131,58,0.18)}
+.btn-o:hover{background:rgba(184,131,58,0.12);color:var(--gold)}
+.btn-p{background:linear-gradient(135deg,var(--gold),#9a6a28);color:#fff;font-weight:600}
+.btn-p:hover{background:linear-gradient(135deg,var(--gold-light),var(--gold))}
+
+.page-title{text-align:center;padding:24px 0 10px}
+.page-title h2{font-size:18px;letter-spacing:4px;color:#5a3a1a}
+.page-title p{font-size:11px;color:var(--text-light);margin-top:4px;letter-spacing:1px}
+
+/* Photo wall */
+.wall-section{margin:0 20px 24px}
+.wall-title{font-size:13px;font-weight:700;color:#5a3a1a;letter-spacing:2px;margin-bottom:12px;padding-left:8px;border-left:3px solid var(--gold);display:flex;align-items:center;gap:8px}
+.wall-title .count{font-size:10px;color:var(--text-light);font-weight:400}
+.wall-scroll{display:flex;gap:12px;overflow-x:auto;padding:4px 4px 16px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--gold) transparent}
+.wall-scroll::-webkit-scrollbar{height:4px}
+.wall-scroll::-webkit-scrollbar-track{background:transparent}
+.wall-scroll::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+
+.photo-item{flex-shrink:0;width:200px;height:150px;border-radius:10px;overflow:hidden;position:relative;cursor:pointer;box-shadow:0 2px 8px rgba(100,70,40,0.1);transition:all .35s cubic-bezier(0.25,0.46,0.45,0.94);border:1px solid rgba(184,131,58,0.12)}
+.photo-item:hover{transform:scale(1.08);box-shadow:0 12px 30px rgba(100,70,40,0.15);z-index:10;border-color:rgba(184,131,58,0.3)}
+.photo-item img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.photo-item:hover img{transform:scale(1.1)}
+.photo-caption{position:absolute;bottom:0;left:0;right:0;padding:20px 8px 8px;background:linear-gradient(transparent,rgba(60,40,20,0.7));color:#fff;font-size:11px;letter-spacing:1px;opacity:0;transition:opacity .3s}
+.photo-item:hover .photo-caption{opacity:1}
+.photo-del{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(180,60,60,0.85);color:#fff;border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;z-index:5}
+.photo-item:hover .photo-del{opacity:1}
+.photo-del:hover{background:rgba(200,40,40,1)}
+
+/* Add photo placeholder */
+.photo-add{flex-shrink:0;width:200px;height:150px;border-radius:10px;border:2px dashed rgba(184,131,58,0.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:all .2s;color:var(--text-light);background:rgba(255,255,255,0.3)}
+.photo-add:hover{border-color:var(--gold);color:var(--gold);background:rgba(184,131,58,0.04)}
+.photo-add .plus{font-size:28px;opacity:.5}
+.photo-add span{font-size:11px;letter-spacing:1px}
+
+/* Lightbox */
+.lightbox{position:fixed;inset:0;background:rgba(30,20,10,0.92);z-index:1000;display:none;align-items:center;justify-content:center;flex-direction:column;backdrop-filter:blur(10px)}
+.lightbox.show{display:flex}
+.lightbox img{max-width:90vw;max-height:80vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.lightbox-caption{color:#e0d0c0;font-size:13px;letter-spacing:1px;margin-top:12px}
+.lightbox-close{position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.lightbox-close:hover{background:rgba(255,255,255,0.2)}
+.lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:60px;border:none;background:rgba(255,255,255,0.1);color:#fff;cursor:pointer;font-size:20px;border-radius:4px;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.lightbox-nav:hover{background:rgba(255,255,255,0.2)}
+.lightbox-prev{left:20px}
+.lightbox-next{right:20px}
+
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-light);font-size:12px}
+.empty-state .ico{font-size:48px;display:block;margin-bottom:12px;opacity:.2}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1><span class="seal">程</span>家族照片墙</h1>
+  <div class="topbar-actions">
+    <button class="btn btn-o" onclick="exportPhotos()">&#128190; 导出</button>
+    <button class="btn btn-o" onclick="document.getElementById('importFile').click()">&#128194; 导入</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importPhotos(event)">
+    <a href="index.html" class="btn btn-o" style="text-decoration:none">&#8592; 家谱</a>
+  </div>
+</div>
+
+<div class="page-title">
+  <h2>家族照片墙</h2>
+  <p>记录家族珍贵瞬间，留住美好回忆</p>
+</div>
+
+<div id="wallContainer"></div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <button class="lightbox-nav lightbox-prev" onclick="navLightbox(-1)">&#9664;</button>
+  <button class="lightbox-nav lightbox-next" onclick="navLightbox(1)">&#9654;</button>
+  <img id="lbImg" src="" alt="">
+  <div class="lightbox-caption" id="lbCaption"></div>
+</div>
+
+<script>
+var SK = 'cheng_family_photos_v1';
+
+// Default demo photos (replace with your own)
+var defaultPhotos = {
+  '老照片': [
+    {url:'https://images.unsplash.com/photo-1531844251246-9f147129146c?w=400&h=300&fit=crop', caption:'程家祖宅旧照'},
+    {url:'https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?w=400&h=300&fit=crop', caption:'家族合影'},
+    {url:'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&h=300&fit=crop', caption:'祭祖仪式'},
+  ],
+  '家族聚会': [
+    {url:'https://images.unsplash.com/photo-1523301343968-6a6ebf63c672?w=400&h=300&fit=crop', caption:'春节团圆饭'},
+    {url:'https://images.unsplash.com/photo-1543807535-eceef0bc6599?w=400&h=300&fit=crop', caption:'清明扫墓'},
+    {url:'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=400&h=300&fit=crop', caption:'家族聚餐'},
+  ],
+  '人物风采': [
+    {url:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop', caption:'长辈风采'},
+    {url:'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=300&fit=crop', caption:'家族长辈'},
+    {url:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=300&fit=crop', caption:'青年一辈'},
+  ]
+};
+
+var photos = {};
+var lbIndex = 0;
+var lbArray = [];
+
+function loadPhotos() {
+  try {
+    var s = localStorage.getItem(SK);
+    if (s) photos = JSON.parse(s);
+  } catch(e) {}
+  if (!photos || Object.keys(photos).length === 0) {
+    photos = JSON.parse(JSON.stringify(defaultPhotos));
+  }
+}
+function savePhotos() { localStorage.setItem(SK, JSON.stringify(photos)); }
+
+function render() {
+  var container = document.getElementById('wallContainer');
+  var html = '';
+  var total = 0;
+  for (var cat in photos) total += photos[cat].length;
+
+  if (total === 0) {
+    html = '<div class="empty-state"><span class="ico">&#128444;</span><p>暂无照片，点击下方添加</p></div>';
+  } else {
+    for (var cat in photos) {
+      var items = photos[cat];
+      html += '<div class="wall-section">';
+      html += '<div class="wall-title">' + cat + ' <span class="count">(' + items.length + ')</span></div>';
+      html += '<div class="wall-scroll">';
+      items.forEach(function(item, idx) {
+        html += '<div class="photo-item" onclick="openLightbox(\''+cat+'\','+idx+')">';
+        html += '<img src="'+item.url+'" alt="'+esc(item.caption||'')+'" loading="lazy">';
+        html += '<div class="photo-caption">'+esc(item.caption||'')+'</div>';
+        html += '<button class="photo-del" onclick="event.stopPropagation();deletePhoto(\''+cat+'\','+idx+')">&times;</button>';
+        html += '</div>';
+      });
+      html += '<div class="photo-add" onclick="addPhoto(\''+cat+'\')">';
+      html += '<span class="plus">+</span><span>添加照片</span>';
+      html += '</div>';
+      html += '</div></div>';
+    }
+  }
+
+  // Add new category
+  html += '<div class="wall-section" style="text-align:center;padding:10px 0">';
+  html += '<button class="btn btn-p" onclick="addCategory()">+ 新建相册</button>';
+  html += '</div>';
+
+  container.innerHTML = html;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function addPhoto(cat) {
+  var url = prompt('请输入照片URL（或Base64）：');
+  if (!url) return;
+  var caption = prompt('照片描述：') || '';
+  if (!photos[cat]) photos[cat] = [];
+  photos[cat].push({url:url, caption:caption});
+  savePhotos();
+  render();
+}
+
+function deletePhoto(cat, idx) {
+  if (!confirm('确定删除这张照片？')) return;
+  photos[cat].splice(idx, 1);
+  if (photos[cat].length === 0) delete photos[cat];
+  savePhotos();
+  render();
+}
+
+function addCategory() {
+  var name = prompt('请输入相册名称：');
+  if (!name || photos[name]) return;
+  photos[name] = [];
+  savePhotos();
+  render();
+}
+
+function openLightbox(cat, idx) {
+  lbArray = photos[cat] || [];
+  lbIndex = idx;
+  showLb();
+}
+function showLb() {
+  if (lbIndex < 0) lbIndex = lbArray.length - 1;
+  if (lbIndex >= lbArray.length) lbIndex = 0;
+  var item = lbArray[lbIndex];
+  if (!item) return;
+  document.getElementById('lbImg').src = item.url;
+  document.getElementById('lbCaption').textContent = item.caption || '';
+  document.getElementById('lightbox').classList.add('show');
+}
+function closeLightbox(e) {
+  if (e && e.target !== document.getElementById('lightbox') && e.target !== document.querySelector('.lightbox-close')) return;
+  document.getElementById('lightbox').classList.remove('show');
+}
+function navLightbox(dir) {
+  lbIndex += dir;
+  showLb();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (!document.getElementById('lightbox').classList.contains('show')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') navLightbox(-1);
+  if (e.key === 'ArrowRight') navLightbox(1);
+});
+
+function exportPhotos() {
+  var blob = new Blob([JSON.stringify(photos, null, 2)], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '家族照片墙_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importPhotos(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      var d = JSON.parse(ev.target.result);
+      if (typeof d !== 'object') { alert('格式错误'); return; }
+      if (!confirm('导入将覆盖当前所有照片数据，确认？')) return;
+      photos = d;
+      savePhotos();
+      render();
+      alert('导入成功！');
+    } catch(err) { alert('解析失败：' + err.message); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+loadPhotos();
+render();
+</script>
+
+</body>
+</html>
