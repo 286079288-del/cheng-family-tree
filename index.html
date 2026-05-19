@@ -80,7 +80,7 @@ body{font-family:"Noto Serif SC","STSong","SimSun","KaiTi",serif;background:line
 .detail-card{padding:0;color:#3d2e20}
 .detail-top{display:flex;flex-direction:column;align-items:center;padding:20px 16px 16px;border-bottom:1px dashed #d4c5a0}
 .detail-avatar-wrap{flex-shrink:0;text-align:center}
-.detail-avatar-wrap .avt-big{width:120px;height:120px;border-radius:50%;margin:0 auto 8px;background-size:contain;background-position:center;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff;font-weight:bold;box-shadow:0 4px 16px rgba(0,0,0,0.1);border:5px solid #fff}
+.detail-avatar-wrap .avt-big{width:180px;height:130px;border-radius:16px;margin:0 auto 8px;background-size:contain;background-position:center;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff;font-weight:bold;box-shadow:0 4px 16px rgba(0,0,0,0.1);border:4px solid #fff}
 .avt-big.m{background:linear-gradient(135deg,#5a7a98,#7a98b0);border-color:#5a7a98}
 .avt-big.f{background:linear-gradient(135deg,#985a7a,#b07a98);border-color:#b07a98}
 .avatar-gender-tag{display:inline-block;padding:2px 8px;font-size:9px;border-radius:8px;font-weight:600;letter-spacing:1px}
@@ -555,7 +555,7 @@ function render() {
     var sym = n.gender === 'male' ? '\u2642' : '\u2640';
     var avtClass = n.gender === 'male' ? 'male' : 'female';
     var avtHtml = n.photo
-      ? '<div class="avt-mini" style="background-image:url('+n.photo+')"></div>'
+      ? '<div class="avt-mini '+avtClass+'" style="background-image:url('+n.photo+')"></div>'
       : '<div class="avt-mini '+avtClass+'">'+sym+'</div>';
 
     // Spouse line
