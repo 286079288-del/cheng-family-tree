@@ -52,9 +52,9 @@ body{font-family:"Noto Serif SC","STSong","SimSun","KaiTi",serif;background:line
 .person-node.depth-7,.person-node.depth-8{background:linear-gradient(135deg,#fffcf8,#fffef9);color:#3d3025;border:1px solid rgba(184,131,58,0.1)}
 .person-node.depth-9,.person-node.depth-10,.person-node.depth-11,.person-node.depth-12{background:#fffdf9;color:#3d3025;border:1px solid rgba(184,131,58,0.08)}
 
-.person-node .avt-mini{width:84px;height:84px;border-radius:50%;margin:0 8px 0 6px;background-size:contain;background-position:center;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;font-weight:bold;flex-shrink:0;box-shadow:0 3px 10px rgba(100,70,40,0.15);border:4px solid transparent}
-.person-node .avt-mini.male{background:linear-gradient(135deg,#92b4cc,#adccdd);border-color:#92b4cc}
-.person-node .avt-mini.female{background:linear-gradient(135deg,#c898a5,#ddb3bc);border-color:#c898a5}
+.person-node .avt-mini{width:84px;height:84px;border-radius:50%;margin:0 8px 0 6px;background-size:cover;background-position:top center;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;font-weight:bold;flex-shrink:0;box-shadow:0 3px 10px rgba(100,70,40,0.15);border:4px solid transparent}
+.person-node .avt-mini.male{background-image:linear-gradient(135deg,#92b4cc,#adccdd);border-color:#92b4cc}
+.person-node .avt-mini.female{background-image:linear-gradient(135deg,#c898a5,#ddb3bc);border-color:#c898a5}
 .person-node .nm-wrap{display:flex;flex-direction:column;min-width:0;flex:1;line-height:1.3;padding:0 12px 0 0}
 .person-node .nm{font-size:15px;font-weight:600;letter-spacing:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .person-node.depth-0 .nm,.person-node.depth-1 .nm{text-shadow:0 1px 2px rgba(0,0,0,0.2)}
@@ -80,9 +80,9 @@ body{font-family:"Noto Serif SC","STSong","SimSun","KaiTi",serif;background:line
 .detail-card{padding:0;color:#3d2e20}
 .detail-top{display:flex;flex-direction:column;align-items:center;padding:20px 16px 16px;border-bottom:1px dashed #d4c5a0}
 .detail-avatar-wrap{flex-shrink:0;text-align:center}
-.detail-avatar-wrap .avt-big{width:calc(100% - 32px);max-width:340px;aspect-ratio:4/3;border-radius:16px;margin:0 auto 8px;background-size:contain;background-position:center;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff;font-weight:bold;box-shadow:0 4px 16px rgba(0,0,0,0.1);border:4px solid #fff}
-.avt-big.m{background:linear-gradient(135deg,#92b4cc,#adccdd);border-color:#92b4cc}
-.avt-big.f{background:linear-gradient(135deg,#c898a5,#ddb3bc);border-color:#c898a5}
+.detail-avatar-wrap .avt-big{width:calc(100% - 32px);max-width:340px;aspect-ratio:4/3;border-radius:16px;margin:0 auto 8px;background-size:cover;background-position:top center;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff;font-weight:bold;box-shadow:0 4px 16px rgba(0,0,0,0.1);border:4px solid #fff}
+.avt-big.m{background-image:linear-gradient(135deg,#92b4cc,#adccdd);border-color:#92b4cc}
+.avt-big.f{background-image:linear-gradient(135deg,#c898a5,#ddb3bc);border-color:#c898a5}
 .avatar-gender-tag{display:inline-block;padding:2px 8px;font-size:9px;border-radius:8px;font-weight:600;letter-spacing:1px}
 .gender-m{background:#eaf2f7;color:#7a9eb5}
 .gender-f{background:#f7eff1;color:#b08895}
@@ -141,9 +141,9 @@ body{font-family:"Noto Serif SC","STSong","SimSun","KaiTi",serif;background:line
 .list-card{background:#fff;border:1px solid rgba(184,131,58,0.15);border-radius:14px;padding:16px 20px;cursor:pointer;transition:all .2s;box-shadow:0 1px 4px rgba(100,70,40,0.04)}
 .list-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(100,70,40,0.08);border-color:rgba(184,131,58,0.3)}
 .list-card-layout{display:flex;align-items:flex-start;gap:16px}
-.list-card-avt{width:100px;height:100px;border-radius:50%;flex-shrink:0;background-size:contain;background-position:center;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;font-weight:bold;border:5px solid transparent;box-shadow:0 3px 12px rgba(100,70,40,0.15)}
-.list-card-avt.m{background:linear-gradient(135deg,#92b4cc,#adccdd);border-color:#92b4cc}
-.list-card-avt.f{background:linear-gradient(135deg,#c898a5,#ddb3bc);border-color:#c898a5}
+.list-card-avt{width:100px;height:100px;border-radius:50%;flex-shrink:0;background-size:cover;background-position:top center;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;font-weight:bold;border:5px solid transparent;box-shadow:0 3px 12px rgba(100,70,40,0.15)}
+.list-card-avt.m{background-image:linear-gradient(135deg,#92b4cc,#adccdd);border-color:#92b4cc}
+.list-card-avt.f{background-image:linear-gradient(135deg,#c898a5,#ddb3bc);border-color:#c898a5}
 .list-card-body{flex:1;min-width:0}
 .list-card-name{font-size:18px;font-weight:700;color:#3d3025;letter-spacing:2px;margin-bottom:6px}
 .list-card-meta{font-size:11px;color:var(--text-light);margin-top:2px}
@@ -284,7 +284,7 @@ function buildTree() {
     }
   });
   var roots = familyData.people
-    .filter(function(p) { return !p.parentId; })
+    .filter(function(p) { return !p.parentId && p.gender === 'male' && p.notes !== '女婿'; })
     .map(function(p) { return map[p.id]; })
     .filter(function(p) { return p.gender === 'male'; });
   return {roots: roots, map: map};
@@ -663,6 +663,7 @@ function selectPerson(id) {
     if (parent.spouse) {
       var mo = familyData.people.filter(function(x){return x.name===parent.spouse && x.gender==='female';})[0];
       if (mo) relHtml += '<span class="relation-tag parent" onclick="selectPerson(\''+mo.id+'\')">母亲：'+esc(mo.name)+'</span>';
+      else relHtml += '<span class="relation-tag parent">母亲：'+esc(parent.spouse)+'</span>';
     }
   }
   if (p.spouse) {
@@ -677,17 +678,18 @@ function selectPerson(id) {
   if (!relHtml) relHtml = '<span style="font-size:11px;color:#8a7b68">暂无亲属记录</span>';
 
   var sym = p.gender==='male' ? '\u2642' : '\u2640';
-  var photoAvt = p.photo ? 'style="background-image:url('+p.photo+')"' : '';
-  var avtContent = p.photo ? '' : sym;
+  var photoHtml = p.photo
+    ? '<img src="'+p.photo+'" style="width:calc(100% - 32px);max-width:340px;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,0.1);border:4px solid #fff;display:block;margin:0 auto 8px">'
+    : '<div class="avt-big '+avCls+'">'+sym+'</div>';
   var lifeInfo = '';
-  if (p.birth) lifeInfo += p.birth + '年生';
-  if (p.death) lifeInfo += '，' + p.death + '年卒';
+  if (p.birth) lifeInfo += formatDateDisplay(p.birth) + '生';
+  if (p.death) lifeInfo += '，' + formatDateDisplay(p.death) + '卒';
 
   document.getElementById('panelBody').innerHTML =
     '<div class="detail-card">' +
       '<div class="detail-top">' +
         '<div class="detail-avatar-wrap">' +
-          '<div class="avt-big '+avCls+'" '+photoAvt+'>'+avtContent+'</div>' +
+          photoHtml +
           '<span class="avatar-gender-tag '+(p.gender==='male'?'gender-m':'gender-f')+'">'+(p.gender==='male'?'男':'女')+'</span>' +
           '<div><label class="photo-change">换照<input type="file" accept="image/*" onchange="uploadPhoto(event)"></label></div>' +
         '</div>' +
@@ -695,8 +697,8 @@ function selectPerson(id) {
           '<div class="person-name">'+esc(p.name)+'</div>' +
           (lifeInfo ? '<div class="person-subtitle">'+lifeInfo+'</div>' : '') +
           '<div class="info-grid">' +
-            (p.birth ? '<div class="info-item"><div class="info-lbl">出生年份</div><div class="info-val">'+esc(p.birth)+'</div></div>' : '') +
-            (p.death ? '<div class="info-item"><div class="info-lbl">逝世年份</div><div class="info-val">'+esc(p.death)+'</div></div>' : '') +
+            (p.birth ? '<div class="info-item"><div class="info-lbl">出生</div><div class="info-val">'+formatDateDisplay(p.birth)+'</div></div>' : '') +
+            (p.death ? '<div class="info-item"><div class="info-lbl">终年</div><div class="info-val">'+formatDateDisplay(p.death)+'</div></div>' : '') +
             (p.spouse ? '<div class="info-item"><div class="info-lbl">配偶</div><div class="info-val">'+esc(p.spouse)+'</div></div>' : '') +
             (p.residence ? '<div class="info-item"><div class="info-lbl">现居地</div><div class="info-val">'+esc(p.residence)+'</div></div>' : '') +
             (p.occupation ? '<div class="info-item"><div class="info-lbl">职业</div><div class="info-val">'+esc(p.occupation)+'</div></div>' : '') +
@@ -803,8 +805,8 @@ function showForm(title, person) {
         '</div>' +
         '<div class="fr"><div class="fg"><label>姓名 *</label><input id="fName" value="'+esc(d.name)+'" placeholder="姓名"></div>' +
         '<div class="fg"><label>性别</label><select id="fGender"><option value="male"'+(d.gender==='male'?' selected':'')+'>男</option><option value="female"'+(d.gender==='female'?' selected':'')+'>女</option></select></div></div>' +
-        '<div class="fr"><div class="fg"><label>出生年份</label><input id="fBirth" value="'+esc(d.birth||'')+'" placeholder="如1950"></div>' +
-        '<div class="fg"><label>逝世年份</label><input id="fDeath" value="'+esc(d.death||'')+'" placeholder="如2020"></div></div>' +
+        '<div class="fr"><div class="fg"><label>出生日期</label><div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap"><select id="fBirthY" style="width:72px"><option value="">年</option></select><select id="fBirthM" style="width:56px"><option value="">月</option></select><select id="fBirthD" style="width:56px"><option value="">日</option></select><label style="font-size:10px;white-space:nowrap;display:flex;align-items:center;gap:2px;cursor:pointer"><input type="checkbox" id="fBirthLunar"> 阴历</label></div></div>' +
+        '<div class="fg"><label>状态</label><div style="display:flex;gap:6px;align-items:center"><label style="font-size:11px;display:flex;align-items:center;gap:2px;cursor:pointer"><input type="radio" name="fAlive" id="fAliveY" value="1" checked> 在世</label><label style="font-size:11px;display:flex;align-items:center;gap:2px;cursor:pointer"><input type="radio" name="fAlive" id="fAliveN" value="0"> 终年</label></div><div id="deathDateWrap" style="display:none;margin-top:4px"><div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap"><select id="fDeathY" style="width:72px"><option value="">年</option></select><select id="fDeathM" style="width:56px"><option value="">月</option></select><select id="fDeathD" style="width:56px"><option value="">日</option></select><label style="font-size:10px;white-space:nowrap;display:flex;align-items:center;gap:2px;cursor:pointer"><input type="checkbox" id="fDeathLunar"> 阴历</label></div></div></div></div>' +
         '<div class="fg"><label>现居地</label><input id="fResidence" value="'+esc(d.residence||'')+'" placeholder="省/市/区"></div>' +
         '<div class="fr"><div class="fg"><label>职业</label><input id="fOccupation" value="'+esc(d.occupation||'')+'" placeholder="职业"></div>' +
         '<div class="fg"><label>联系方式</label><input id="fContact" value="'+esc(d.contact||'')+'" placeholder="电话/微信"></div></div>' +
@@ -813,6 +815,59 @@ function showForm(title, person) {
         '<div class="ma"><button class="btn btn-o" onclick="closeModal()">取消</button><button class="btn btn-p" onclick="savePerson()">保存</button></div>' +
       '</div>' +
     '</div>';
+
+  // Populate year/month/day selects
+  function populateYMD(yId, mId, dId, dateStr) {
+    var ySel = document.getElementById(yId);
+    var mSel = document.getElementById(mId);
+    var dSel = document.getElementById(dId);
+    var isLunar = false;
+    var y='', m='', dd='';
+    if (dateStr) {
+      isLunar = dateStr.indexOf('农历') >= 0;
+      var clean = dateStr.replace('(农历)','').replace('（农历）','').trim();
+      var parts = clean.split('-');
+      y = parts[0] || '';
+      m = parts[1] || '';
+      dd = parts[2] || '';
+    }
+    // Year: 1900-2030
+    for (var i = 2030; i >= 1900; i--) {
+      var op = document.createElement('option'); op.value = i; op.textContent = i;
+      if (i.toString() === y) op.selected = true;
+      ySel.appendChild(op);
+    }
+    // Month: 1-12
+    for (var i = 1; i <= 12; i++) {
+      var op = document.createElement('option'); op.value = i; op.textContent = i;
+      if (i.toString() === m) op.selected = true;
+      mSel.appendChild(op);
+    }
+    // Day: 1-31
+    for (var i = 1; i <= 31; i++) {
+      var op = document.createElement('option'); op.value = i; op.textContent = i;
+      if (i.toString() === dd) op.selected = true;
+      dSel.appendChild(op);
+    }
+    return isLunar;
+  }
+
+  var birthLunar = populateYMD('fBirthY','fBirthM','fBirthD', d.birth||'');
+  if (birthLunar) document.getElementById('fBirthLunar').checked = true;
+
+  var isDead = !!(d.death);
+  document.getElementById('fAliveY').checked = !isDead;
+  document.getElementById('fAliveN').checked = isDead;
+  var deathLunar = populateYMD('fDeathY','fDeathM','fDeathD', d.death||'');
+  if (deathLunar) document.getElementById('fDeathLunar').checked = true;
+  document.getElementById('deathDateWrap').style.display = isDead ? 'block' : 'none';
+
+  // Toggle death date visibility
+  document.querySelectorAll('input[name="fAlive"]').forEach(function(r) {
+    r.addEventListener('change', function() {
+      document.getElementById('deathDateWrap').style.display = this.value === '0' ? 'block' : 'none';
+    });
+  });
 }
 
 function previewPhoto(e) {
@@ -831,6 +886,25 @@ function previewPhoto(e) {
 function savePerson() {
   var name = document.getElementById('fName').value.trim();
   if (!name) { alert('请输入姓名'); return; }
+
+  // Build date string from Y/M/D selects + lunar checkbox
+  function buildDateStr(yId, mId, dId, lunarId) {
+    var y = document.getElementById(yId).value;
+    var m = document.getElementById(mId).value;
+    var d = document.getElementById(dId).value;
+    var lunar = document.getElementById(lunarId).checked;
+    if (!y) return '';
+    var s = y;
+    if (m) s += '-' + m;
+    if (d) s += '-' + d;
+    if (lunar) s += '(农历)';
+    return s;
+  }
+
+  var birthStr = buildDateStr('fBirthY','fBirthM','fBirthD','fBirthLunar');
+  var isAlive = document.getElementById('fAliveY').checked;
+  var deathStr = isAlive ? '' : buildDateStr('fDeathY','fDeathM','fDeathD','fDeathLunar');
+
   if (editId) {
     // Editing existing person: preserve parentId from original record
     var idx = -1;
@@ -841,8 +915,8 @@ function savePerson() {
       var orig = familyData.people[idx];
       orig.name = name;
       orig.gender = document.getElementById('fGender').value;
-      orig.birth = document.getElementById('fBirth').value.trim();
-      orig.death = document.getElementById('fDeath').value.trim() || null;
+      orig.birth = birthStr || '';
+      orig.death = deathStr || null;
       orig.residence = document.getElementById('fResidence').value.trim();
       orig.occupation = document.getElementById('fOccupation').value.trim();
       orig.contact = document.getElementById('fContact').value.trim();
@@ -856,8 +930,8 @@ function savePerson() {
       id: 'p' + Date.now(),
       name: name,
       gender: document.getElementById('fGender').value,
-      birth: document.getElementById('fBirth').value.trim(),
-      death: document.getElementById('fDeath').value.trim() || null,
+      birth: birthStr || '',
+      death: deathStr || null,
       residence: document.getElementById('fResidence').value.trim(),
       occupation: document.getElementById('fOccupation').value.trim(),
       contact: document.getElementById('fContact').value.trim(),
@@ -881,6 +955,21 @@ function closeModal(e) {
   editId = null;
   editParentId = null;
   editPhoto = null;
+}
+
+function formatDateDisplay(s) {
+  if (!s) return '';
+  var lunar = s.indexOf('农历') >= 0;
+  var clean = s.replace('(农历)','').replace('（农历）','').trim();
+  var parts = clean.split('-');
+  var y = parts[0] || '';
+  var m = parts[1] || '';
+  var d = parts[2] || '';
+  var r = y + '年';
+  if (m) r += m + '月';
+  if (d) r += d + '日';
+  if (lunar) r += '（农历）';
+  return r;
 }
 
 function esc(s) {
