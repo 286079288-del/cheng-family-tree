@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>东郭程氏族谱</title>
+<style>
+:root{--bg:#f0e6d0;--bg-grad:#f5efe0;--card-w:140px;--card-h:52px;--level-gap:220px;--sib-gap:10px;--root-gap:50px;--gold:#b8833a;--gold-light:#d4a860;--text:#3d3025;--text-light:#8a7b68;--line:#c4b8a0;--accent:#8b2e2e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Noto Serif SC","STSong","SimSun","KaiTi",serif;background:linear-gradient(180deg,var(--bg-grad),var(--bg));color:var(--text);min-height:100vh;overflow:hidden}
+
+.topbar{background:rgba(255,255,255,0.25);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(200,180,150,0.3);padding:8px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.topbar h1{font-size:16px;letter-spacing:5px;display:flex;align-items:center;gap:10px;color:var(--text)}
+.topbar h1 .seal{width:30px;height:30px;border:2px solid var(--gold);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--gold);font-weight:700;background:rgba(184,131,58,0.08)}
+.topbar-actions{display:flex;gap:4px;flex-wrap:wrap}
+.btn{padding:4px 10px;border-radius:5px;cursor:pointer;font-family:inherit;font-size:11px;letter-spacing:1px;transition:all .2s;display:flex;align-items:center;gap:3px;white-space:nowrap;border:none}
+.btn-o{background:rgba(184,131,58,0.06);color:var(--text-light);border:1px solid rgba(184,131,58,0.18)}
+.btn-o:hover{background:rgba(184,131,58,0.12);color:var(--gold);border-color:rgba(184,131,58,0.35)}
+.btn-p{background:linear-gradient(135deg,var(--gold),#9a6a28);color:#fff;font-weight:600;border:none}
+.btn-p:hover{background:linear-gradient(135deg,var(--gold-light),var(--gold))}
+.btn-sm{padding:3px 8px;font-size:10px}
+.btn-d{background:rgba(180,60,60,0.08);color:#c06060;border:1px solid rgba(180,60,60,0.15)}
+.btn-d:hover{background:rgba(180,60,60,0.15)}
+
+.main-wrap{display:flex;height:calc(100vh - 50px)}
+.tree-area{flex:1;overflow:auto;position:relative;cursor:grab;
+  background:
+    radial-gradient(ellipse at 10% 30%,rgba(184,131,58,0.04) 0%,transparent 40%),
+    radial-gradient(ellipse at 80% 70%,rgba(184,131,58,0.03) 0%,transparent 40%),
+    linear-gradient(rgba(184,131,58,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(184,131,58,0.04) 1px,transparent 1px),
+    linear-gradient(180deg,var(--bg-grad),var(--bg));
+  background-size:100% 100%,100% 100%,60px 60px,60px 60px,100% 100%}
+.tree-area:active{cursor:grabbing}
+.tree-container{position:relative;margin:0 auto;transform-origin:0 0}
+.lines-svg{position:absolute;top:0;left:0;pointer-events:none;z-index:1}
+
+.person-node{position:absolute;width:var(--card-w);height:var(--card-h);border-radius:8px;padding:0 8px;display:flex;align-items:center;cursor:pointer;transition:all .2s;user-select:none;z-index:2;font-size:12px;font-weight:600;letter-spacing:1px;
+  box-shadow:0 2px 8px rgba(100,70,40,0.08),inset 0 1px 0 rgba(255,255,255,0.5)}
+.person-node:hover{transform:scale(1.06);z-index:10;
+  box-shadow:0 6px 20px rgba(100,70,40,0.12),0 0 15px rgba(184,131,58,0.08),inset 0 1px 0 rgba(255,255,255,0.6)}
+.person-node.selected{box-shadow:0 0 0 2px var(--gold),0 4px 16px rgba(184,131,58,0.15);z-index:10}
+
+/* 暖色系深度系统 - 始祖深棕 → 后代渐浅 */
+.person-node.depth-0{background:linear-gradient(135deg,#5a3a1a,#7a5030);color:#f5efe0;border:1px solid rgba(184,131,58,0.4)}
+.person-node.depth-1{background:linear-gradient(135deg,#7a5830,#9a7048);color:#f0e6d0;border:1px solid rgba(184,131,58,0.35)}
+.person-node.depth-2{background:linear-gradient(135deg,#f8f0e0,#fff8f0);color:#3d3025;border:1px solid rgba(184,131,58,0.25)}
+.person-node.depth-3{background:linear-gradient(135deg,#faf4e4,#fffaf0);color:#3d3025;border:1px solid rgba(184,131,58,0.2)}
+.person-node.depth-4{background:linear-gradient(135deg,#fcf8f0,#fffcf5);color:#3d3025;border:1px solid rgba(184,131,58,0.18)}
+.person-node.depth-5{background:linear-gradient(135deg,#fdfaf5,#fffdf8);color:#3d3025;border:1px solid rgba(184,131,58,0.15)}
+.person-node.depth-6{background:linear-gradient(135deg,#fefbf7,#fffef9);color:#3d3025;border:1px solid rgba(184,131,58,0.12)}
+.person-node.depth-7,.person-node.depth-8{background:linear-gradient(135deg,#fffcf8,#fffef9);color:#3d3025;border:1px solid rgba(184,131,58,0.1)}
+.person-node.depth-9,.person-node.depth-10,.person-node.depth-11,.person-node.depth-12{background:#fffdf9;color:#3d3025;border:1px solid rgba(184,131,58,0.08)}
+
+.person-node .avt-mini{width:34px;height:34px;border-radius:50%;margin-right:7px;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:bold;flex-shrink:0;border:2px solid rgba(255,255,255,0.6);box-shadow:0 2px 6px rgba(100,70,40,0.1)}
+.person-node.depth-0 .avt-mini,.person-node.depth-1 .avt-mini{border-color:rgba(255,255,255,0.3)}
+.person-node .avt-mini.male{background:linear-gradient(135deg,#5a7a98,#7a98b0)}
+.person-node .avt-mini.female{background:linear-gradient(135deg,#985a7a,#b07a98)}
+.person-node .nm-wrap{display:flex;flex-direction:column;min-width:0;flex:1;line-height:1.3}
+.person-node .nm{font-size:12px;font-weight:600;letter-spacing:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.person-node.depth-0 .nm,.person-node.depth-1 .nm{text-shadow:0 1px 2px rgba(0,0,0,0.2)}
+.person-node .nm-spouse{font-size:9px;opacity:0.6;letter-spacing:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;margin-top:1px;color:var(--gold)}
+.person-node.depth-0 .nm-spouse,.person-node.depth-1 .nm-spouse{color:rgba(255,255,255,0.7)}
+.person-node .nm-spouse:hover{opacity:1;text-decoration:underline}
+.person-node .spouse-heart{font-size:8px;margin-right:2px}
+
+.collapse-btn{position:absolute;width:18px;height:18px;border-radius:50%;border:1.5px solid rgba(184,131,58,0.3);background:rgba(255,253,248,0.95);cursor:pointer;z-index:5;font-size:11px;display:flex;align-items:center;justify-content:center;color:var(--gold);transition:all .2s;line-height:1;box-shadow:0 1px 4px rgba(100,70,40,0.1)}
+.collapse-btn:hover{background:var(--gold);color:#fff;border-color:var(--gold);box-shadow:0 2px 8px rgba(184,131,58,0.2)}
+.collapse-badge{position:absolute;font-size:9px;color:var(--gold);white-space:nowrap;background:rgba(184,131,58,0.06);padding:2px 7px;border-radius:8px;z-index:5;pointer-events:none;border:1px solid rgba(184,131,58,0.12)}
+
+.detail-panel{width:0;background:#faf6ee;border-left:1px solid #d4c5a0;overflow:hidden;transition:width .3s;display:flex;flex-direction:column;box-shadow:-4px 0 20px rgba(100,70,40,0.08)}
+.detail-panel.open{width:380px}
+.ph{padding:12px 16px;background:linear-gradient(180deg,#f5efe0,#faf6ee);border-bottom:1px solid #d4c5a0;display:flex;align-items:center;justify-content:space-between}
+.ph h3{font-size:14px;letter-spacing:3px;color:#5a3a1a}
+.pclose{width:26px;height:26px;border:1px solid #c8b898;border-radius:50%;background:transparent;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:#8a7b68;transition:all .2s}
+.pclose:hover{background:#e8d8c0;color:#5a3a1a}
+.pb{flex:1;overflow-y:auto;padding:0}
+.pb .empty{text-align:center;color:#8a7b68;margin-top:80px;font-size:12px}
+.pb .empty .ico{font-size:40px;display:block;margin-bottom:10px;opacity:.2}
+
+.detail-card{padding:18px 16px;color:#3d2e20}
+.detail-top{display:flex;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px dashed #d4c5a0}
+.detail-avatar-wrap{flex-shrink:0;text-align:center}
+.detail-avatar-wrap .avt-big{width:64px;height:64px;border-radius:50%;margin:0 auto 6px;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;font-weight:bold;box-shadow:0 3px 10px rgba(0,0,0,0.1);border:3px solid #fff}
+.avt-big.m{background:linear-gradient(135deg,#5a7a98,#7a98b0)}
+.avt-big.f{background:linear-gradient(135deg,#985a7a,#b07a98)}
+.avatar-gender-tag{display:inline-block;padding:2px 8px;font-size:9px;border-radius:8px;font-weight:600;letter-spacing:1px}
+.gender-m{background:#e8f0f8;color:#5a7a98}
+.gender-f{background:#f8e8ec;color:#985a7a}
+.detail-info{flex:1;min-width:0}
+.detail-info .person-name{font-size:18px;font-weight:700;letter-spacing:3px;margin-bottom:3px;color:#3d2e20}
+.detail-info .person-subtitle{font-size:11px;color:#8a7b68;margin-bottom:8px}
+.detail-info .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
+.info-item .info-lbl{font-size:9px;color:#b8833a;letter-spacing:2px;font-weight:600;margin-bottom:1px}
+.info-item .info-val{font-size:12px;color:#3d2e20;line-height:1.4}
+
+.detail-section{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #e8dcc8}
+.detail-section:last-child{border-bottom:none;margin-bottom:0}
+.detail-section .sec-title{font-size:11px;font-weight:700;color:#5a3a1a;letter-spacing:3px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.detail-section .sec-title::after{content:"";flex:1;height:1px;background:#e0d0b8}
+.relation-list{display:flex;flex-wrap:wrap;gap:5px}
+.relation-tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;cursor:pointer;transition:all .2s;letter-spacing:1px}
+.relation-tag.parent{background:#f5efe0;color:#6b4a2a;border:1px solid #d4c5a0}
+.relation-tag.child{background:#e8f0f8;color:#5a7a98;border:1px solid #c0d0e0}
+.relation-tag.spouse{background:#f8e8ec;color:#985a7a;border:1px solid #e0c0c8}
+.relation-tag:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,0.08)}
+.note-block{background:linear-gradient(135deg,#fdf8f0,#faf4e8);border-radius:6px;padding:12px 14px;font-size:12px;line-height:1.8;color:#5a4a3a;border-left:3px solid #b8833a;font-style:italic}
+.photo-change{margin-top:4px;font-size:9px;color:#8a7b68;cursor:pointer;border:1px dashed #c8b898;border-radius:3px;padding:2px 6px;display:inline-block;transition:all .2s}
+.photo-change:hover{border-color:#b8833a;color:#5a3a1a}
+.photo-change input{display:none}
+.pa{padding:10px 16px;border-top:1px solid #d4c5a0;display:flex;gap:5px;flex-wrap:wrap;background:#f5efe0}
+.pa .btn-o{background:#fffef9;border-color:#c8b898;color:#6b4a2a}
+.pa .btn-o:hover{background:#e8d8c0;border-color:#b8833a}
+
+.modal-ov{position:fixed;inset:0;background:rgba(60,50,35,0.4);z-index:200;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s}
+.modal{background:#faf6ee;border-radius:12px;padding:24px;width:90%;max-width:460px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 50px rgba(100,70,40,0.2);border:1px solid #d4c5a0;animation:slideUp .3s;color:#3d2e20}
+.modal h3{font-size:16px;margin-bottom:14px;text-align:center;letter-spacing:3px;color:#5a3a1a}
+.fg{margin-bottom:10px}
+.fg label{display:block;font-size:10px;color:#8a7b68;margin-bottom:3px;letter-spacing:1px}
+.fg input,.fg select,.fg textarea{width:100%;padding:7px 10px;border:1px solid #d4c5a0;border-radius:6px;background:#fffef9;font-family:inherit;font-size:12px;color:#3d2e20;transition:all .2s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:#b8833a;box-shadow:0 0 0 3px rgba(184,131,58,0.08)}
+.fr{display:flex;gap:6px}.fr .fg{flex:1}
+.ma{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
+
+.legend{position:fixed;bottom:10px;left:10px;z-index:50;background:rgba(255,253,248,0.92);backdrop-filter:blur(8px);border:1px solid rgba(184,131,58,0.15);border-radius:8px;padding:6px 14px;display:flex;gap:12px;font-size:10px}
+.legend i{display:flex;align-items:center;gap:4px;font-style:normal;color:var(--text-light)}
+.legend .ld{width:10px;height:10px;border-radius:3px;display:inline-block}
+.ld.d0{background:linear-gradient(135deg,#5a3a1a,#7a5030)}.ld.d1{background:linear-gradient(135deg,#7a5830,#9a7048)}.ld.d2{background:linear-gradient(135deg,#f8f0e0,#fff8f0);border:1px solid rgba(184,131,58,0.25)}.ld.d3{background:linear-gradient(135deg,#faf4e4,#fffaf0);border:1px solid rgba(184,131,58,0.2)}.ld.d4{background:linear-gradient(135deg,#fcf8f0,#fffcf5);border:1px solid rgba(184,131,58,0.18)}
+.stats{position:fixed;bottom:10px;right:10px;z-index:50;background:rgba(255,253,248,0.92);backdrop-filter:blur(8px);border:1px solid rgba(184,131,58,0.15);border-radius:8px;padding:6px 14px;font-size:10px;color:var(--text-light)}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:768px){
+  .main-wrap{flex-direction:column}
+  .detail-panel{width:100%!important;height:0;border-left:none;border-top:1px solid #c8b898}
+  .detail-panel.open{height:50vh;width:100%!important}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1><span class="seal">程</span>东郭程氏族谱</h1>
+  <div class="topbar-actions">
+    <button class="btn btn-o" onclick="doZoom(-1)">- 缩小</button>
+    <button class="btn btn-o" onclick="doZoom(1)">+ 放大</button>
+    <button class="btn btn-o" onclick="resetView()">重置视图</button>
+    <button class="btn btn-o" onclick="expandAll()">全部展开</button>
+    <button class="btn btn-o" onclick="collapseDeep()">收起深层</button>
+    <button class="btn btn-o" onclick="searchPerson()">查找成员</button>
+    <button class="btn btn-p" onclick="handleAdd(null)">+ 添加先祖</button>
+    <a href="family-memory.html" class="btn btn-o" style="text-decoration:none">&#128220; 家族记忆</a>
+  </div>
+</div>
+<div class="main-wrap">
+  <div class="tree-area" id="treeArea">
+    <div class="tree-container" id="treeContainer">
+      <svg class="lines-svg" id="linesSvg"></svg>
+    </div>
+  </div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="ph"><h3 id="panelTitle">家族成员</h3><button class="pclose" onclick="closePanel()">&#10005;</button></div>
+    <div class="pb" id="panelBody"><div class="empty"><span class="ico">&#128100;</span><p>点击人物查看详情</p></div></div>
+    <div class="pa" id="panelActions" style="display:none">
+      <button class="btn btn-o btn-sm" onclick="handleEdit()">编辑</button>
+      <button class="btn btn-o btn-sm" onclick="handleAdd(selectedId)">+ 添加子女</button>
+      <button class="btn btn-d btn-sm" onclick="handleDelete()">删除</button>
+    </div>
+  </div>
+</div>
+<div class="legend">
+  <i><span class="ld d0"></span>始祖</i>
+  <i><span class="ld d1"></span>第二代</i>
+  <i><span class="ld d2"></span>第三代</i>
+  <i><span class="ld d3"></span>第四代</i>
+  <i><span class="ld d4"></span>第五代</i>
+</div>
+<div class="stats">共 <b id="statsCount">0</b> 人</div>
+<div id="modalBox"></div>
+<script>
+var DEFAULT_DATA = {"familyName":"程","people":[{"id":"p1","name":"程礼信","gender":"male","birth":"1808","death":"1877","residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"始祖","parentId":null},{"id":"p2","name":"程德瑞","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"田庆英","photo":"","notes":"配田庆英，张庄","parentId":"p1"},{"id":"p3","name":"田庆英","gender":"female","birth":"","death":null,"residence":"张庄","occupation":"","contact":"","spouse":"程德瑞","photo":"","notes":"","parentId":null},{"id":"p4","name":"程全水","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"宋传英","photo":"","notes":"入山","parentId":"p2"},{"id":"p5","name":"宋传英","gender":"female","birth":"","death":null,"residence":"凡山","occupation":"","contact":"","spouse":"程全水","photo":"","notes":"","parentId":null},{"id":"p6","name":"程计龙","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p4"},{"id":"p7","name":"程广胜","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p6"},{"id":"p8","name":"程召坤","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p7"},{"id":"p9","name":"程飞扬","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p8"},{"id":"p10","name":"程召波","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p7"},{"id":"p11","name":"程泽琪","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p10"},{"id":"p12","name":"程广利","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p6"},{"id":"p13","name":"程琳","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p12"},{"id":"p14","name":"程文奥","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p12"},{"id":"p15","name":"程广巧","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p6"},{"id":"p16","name":"程广凤","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p6"},{"id":"p17","name":"程计忠","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p4"},{"id":"p18","name":"程计明","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p4"},{"id":"p19","name":"程广志","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p18"},{"id":"p20","name":"程文倩","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p19"},{"id":"p21","name":"程雪瑶","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p19"},{"id":"p22","name":"程悦悦","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p19"},{"id":"p23","name":"程广惠","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p18"},{"id":"p24","name":"程召涵","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p23"},{"id":"p25","name":"程冰源","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p23"},{"id":"p26","name":"程广娥","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p18"},{"id":"p27","name":"程计雨","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p4"},{"id":"p28","name":"程广良","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p27"},{"id":"p29","name":"程召硕","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p28"},{"id":"p30","name":"程召儒","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p28"},{"id":"p31","name":"程广琴","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p27"},{"id":"p32","name":"程计雪","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p4"},{"id":"p33","name":"程广花","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p32"},{"id":"p34","name":"程广美","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p32"},{"id":"p35","name":"chang","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p34"},{"id":"p36","name":"程广超","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p32"},{"id":"p37","name":"程星野","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p36"},{"id":"p38","name":"张在明","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"程继英","photo":"","notes":"女婿","parentId":null},{"id":"p39","name":"程继英","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"张在明","photo":"","notes":"","parentId":"p4"},{"id":"p40","name":"张承美","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p39"},{"id":"p41","name":"张宏","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p39"},{"id":"p42","name":"张成斌","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"郑美容","photo":"","notes":"","parentId":"p39"},{"id":"p43","name":"郑美容","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"张成斌","photo":"","notes":"","parentId":null},{"id":"p44","name":"张亚茹","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p42"},{"id":"p45","name":"张学金","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p42"},{"id":"p46","name":"张呈祥","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"王宝英","photo":"","notes":"","parentId":"p39"},{"id":"p47","name":"王宝英","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"张呈祥","photo":"","notes":"","parentId":null},{"id":"p48","name":"张学宁","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p46"},{"id":"p49","name":"李善春","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"程继平","photo":"","notes":"女婿","parentId":null},{"id":"p50","name":"程继平","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"李善春","photo":"","notes":"","parentId":"p4"},{"id":"p51","name":"李强","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"闫亚丽","photo":"","notes":"","parentId":"p50"},{"id":"p52","name":"闫亚丽","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"李强","photo":"","notes":"","parentId":null},{"id":"p53","name":"李雪原","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p51"},{"id":"p54","name":"李猛","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"刘红萍","photo":"","notes":"","parentId":"p50"},{"id":"p55","name":"刘红萍","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"李猛","photo":"","notes":"","parentId":null},{"id":"p56","name":"李雪峰","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p54"},{"id":"p57","name":"孙女","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p56"},{"id":"p58","name":"李杰","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"管士霞","photo":"","notes":"","parentId":"p50"},{"id":"p59","name":"管士霞","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"李杰","photo":"","notes":"","parentId":null},{"id":"p60","name":"李雪飞","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p58"},{"id":"p61","name":"李华","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p50"},{"id":"p62","name":"程全","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p2"},{"id":"p63","name":"程全","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p2"},{"id":"p64","name":"程德海","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p1"},{"id":"p65","name":"程全胜","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p64"},{"id":"p66","name":"程计亮","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p65"},{"id":"p67","name":"程广水","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p66"},{"id":"p68","name":"程","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p67"},{"id":"p69","name":"程","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p67"},{"id":"p70","name":"程广丽","gender":"female","birth":"","death":null,"residence":"济宁","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p66"},{"id":"p71","name":"程计堂","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p65"},{"id":"p72","name":"程晋","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p71"},{"id":"p73","name":"程","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p72"},{"id":"p74","name":"程","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p72"},{"id":"p75","name":"程广玉","gender":"male","birth":"","death":null,"residence":"旺山","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p71"},{"id":"p76","name":"程计清","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p65"},{"id":"p77","name":"程广营","gender":"male","birth":"","death":null,"residence":"国营","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p76"},{"id":"p78","name":"程","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p77"},{"id":"p79","name":"程","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p77"},{"id":"p80","name":"程广秋","gender":"male","birth":"","death":null,"residence":"亚秋","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p76"},{"id":"p81","name":"程计礼","gender":"male","birth":"","death":null,"residence":"全子","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p65"},{"id":"p82","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p81"},{"id":"p83","name":"程计苹","gender":"male","birth":"","death":null,"residence":"金苹","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p65"},{"id":"p84","name":"程计英","gender":"female","birth":"","death":null,"residence":"金英","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p65"},{"id":"p85","name":"程全庆","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p64"},{"id":"p86","name":"程计春","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p85"},{"id":"p87","name":"程俊豪","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p86"},{"id":"p88","name":"程计伟","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p85"},{"id":"p89","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p88"},{"id":"p90","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p88"},{"id":"p91","name":"程计梅","gender":"female","birth":"","death":null,"residence":"济宁","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p85"},{"id":"p92","name":"程全功","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p64"},{"id":"p93","name":"程详","gender":"male","birth":"","death":null,"residence":"新闻","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p92"},{"id":"p94","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p93"},{"id":"p95","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p93"},{"id":"p96","name":"程计苹","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p92"},{"id":"p97","name":"程德富","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p1"},{"id":"p98","name":"程全仁","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p97"},{"id":"p99","name":"程计发","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p98"},{"id":"p100","name":"程广芝","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p99"},{"id":"p101","name":"程秀兰","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p99"},{"id":"p102","name":"程计顺","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p98"},{"id":"p103","name":"程飞龙","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p102"},{"id":"p104","name":"程全新","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p97"},{"id":"p105","name":"程计河","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p104"},{"id":"p106","name":"程计江","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p104"},{"id":"p107","name":"程广甲，秦敏莉","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p106"},{"id":"p108","name":"程允腾","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p107"},{"id":"p109","name":"程小溪","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p107"},{"id":"p110","name":"程慧，姜传同","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p106"},{"id":"p111","name":"姜凯闻","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p110"},{"id":"p112","name":"程计田","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p104"},{"id":"p113","name":"程计","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p104"},{"id":"p114","name":"程全荣","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p97"},{"id":"p115","name":"程计斌","gender":"male","birth":"","death":null,"residence":"雪子","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p114"},{"id":"p116","name":"程广大","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p115"},{"id":"p117","name":"程计雨","gender":"male","birth":"","death":null,"residence":"年子","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p114"},{"id":"p118","name":"程计","gender":"male","birth":"","death":null,"residence":"美子","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p114"},{"id":"p119","name":"程全义","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p97"},{"id":"p120","name":"程计坤","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p119"},{"id":"p121","name":"程广利国利","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p120"},{"id":"p122","name":"程广东东东","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p120"},{"id":"p123","name":"程计乾","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p119"},{"id":"p124","name":"程广学","gender":"male","birth":"","death":null,"residence":"鲁宁","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p123"},{"id":"p125","name":"程全银","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p97"},{"id":"p126","name":"程计华","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p125"},{"id":"p127","name":"程广","gender":"male","birth":"","death":null,"residence":"书宁","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p126"},{"id":"p128","name":"程广","gender":"male","birth":"","death":null,"residence":"书奇","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p126"},{"id":"p129","name":"程计春","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p125"},{"id":"p130","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p129"},{"id":"p131","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p129"},{"id":"p132","name":"程计贵","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p125"},{"id":"p133","name":"程广","gender":"male","birth":"","death":null,"residence":"书同","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p132"},{"id":"p134","name":"程广","gender":"male","birth":"","death":null,"residence":"书恒","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p132"},{"id":"p135","name":"程计云","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p125"},{"id":"p136","name":"程德友","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p1"},{"id":"p137","name":"程全龙","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p136"},{"id":"p138","name":"程计军","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p137"},{"id":"p139","name":"程俊豪","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p138"},{"id":"p140","name":"程计超","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p137"},{"id":"p141","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p140"},{"id":"p142","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p140"},{"id":"p143","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p140"},{"id":"p144","name":"程计","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p137"}]};
+
+var SK = 'cheng_family_tree_v6';
+var familyData, selectedId = null, scale = 0.75;
+var editId = null, editParentId = null, editPhoto = null;
+var collapsedNodes = {};
+var isPanning = false, panX = 0, panY = 0;
+
+function loadData() {
+  try {
+    var s = localStorage.getItem(SK);
+    if (s) {
+      var d = JSON.parse(s);
+      if (d && d.people && d.people.length > 0) return d;
+    }
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+function saveData() { localStorage.setItem(SK, JSON.stringify(familyData)); }
+
+var NW = 140, NH = 52, LG = 220, SG = 8, RG = 50, LP = 60, TP = 40;
+
+function buildTree() {
+  var map = {};
+  familyData.people.forEach(function(p) {
+    map[p.id] = Object.assign({}, p, {children: []});
+  });
+  familyData.people.forEach(function(p) {
+    if (p.parentId && map[p.parentId]) {
+      map[p.parentId].children.push(map[p.id]);
+    }
+  });
+  var roots = familyData.people
+    .filter(function(p) { return !p.parentId; })
+    .map(function(p) { return map[p.id]; })
+    .filter(function(p) { return p.gender === 'male'; });
+  return {roots: roots, map: map};
+}
+
+function countDesc(node) {
+  if (!node.children || !node.children.length) return 0;
+  var c = node.children.length;
+  node.children.forEach(function(ch) { c += countDesc(ch); });
+  return c;
+}
+
+function calcLayout() {
+  var t = buildTree();
+  if (!t.roots.length) return {nodes:[], conns:[], w:0, h:0};
+
+  var vroot = {id:'__vroot__', name:'东郭程家家谱', gender:'male', isVirtual:true, children: t.roots, depth: -1};
+  var curY = TP;
+
+  function lay(nd, dep) {
+    nd.depth = dep;
+    nd.x = dep * LG + LP;
+    if (nd.isVirtual) {
+      nd.children.forEach(function(c) { lay(c, dep+1); });
+      if (nd.children.length) {
+        nd.y = (nd.children[0].y + nd.children[nd.children.length-1].y) / 2;
+      } else { nd.y = TP; }
+      return;
+    }
+    if (collapsedNodes[nd.id] || !nd.children || !nd.children.length) {
+      nd.y = curY;
+      curY += NH + SG;
+      return;
+    }
+    nd.children.forEach(function(c) { lay(c, dep+1); });
+    nd.y = (nd.children[0].y + nd.children[nd.children.length-1].y) / 2;
+  }
+
+  lay(vroot, -1);
+
+  // Spacing between root subtrees
+  var lastEnd = 0;
+  t.roots.forEach(function(root, i) {
+    var sub = [];
+    function collect(n) { sub.push(n); if (!collapsedNodes[n.id] && n.children) n.children.forEach(collect); }
+    collect(root);
+    var minY = sub.reduce(function(m,n){return Math.min(m,n.y);}, Infinity);
+    var maxY = sub.reduce(function(m,n){return Math.max(m,n.y+NH);}, -Infinity);
+    if (i > 0 && minY < lastEnd + RG) {
+      var shift = lastEnd + RG - minY;
+      sub.forEach(function(n) { n.y += shift; });
+      maxY += shift;
+    }
+    lastEnd = maxY;
+  });
+
+  // Recenter virtual root
+  if (t.roots.length) {
+    vroot.y = (t.roots[0].y + t.roots[t.roots.length-1].y) / 2;
+  }
+
+  var nodes = [], conns = [], seen = {};
+  function walk(nd) {
+    if (!nd.isVirtual && !seen[nd.id]) {
+      seen[nd.id] = true;
+      // Find spouse person for photo
+      var spousePhoto = '';
+      if (nd.spouse) {
+        var spPerson = null;
+        for (var si = 0; si < familyData.people.length; si++) {
+          if (familyData.people[si].name === nd.spouse) { spPerson = familyData.people[si]; break; }
+        }
+        if (spPerson && spPerson.photo) spousePhoto = spPerson.photo;
+      }
+      nodes.push({
+        id: nd.id, name: nd.name, gender: nd.gender,
+        birth: nd.birth||'', death: nd.death||'', photo: nd.photo||'',
+        residence: nd.residence||'', occupation: nd.occupation||'',
+        contact: nd.contact||'', spouse: nd.spouse||'', notes: nd.notes||'',
+        spousePhoto: spousePhoto,
+        x: nd.x, y: nd.y, depth: nd.depth,
+        hasChildren: !!(nd.children && nd.children.length),
+        collapsed: !!collapsedNodes[nd.id],
+        hiddenCount: collapsedNodes[nd.id] ? countDesc(nd) : 0
+      });
+    }
+    if (nd.children) {
+      nd.children.forEach(function(ch) {
+        if (nd.isVirtual || !collapsedNodes[nd.id]) {
+          conns.push({
+            x1: nd.isVirtual ? nd.x + NW/2 : nd.x + NW,
+            y1: nd.y + NH/2,
+            x2: ch.x,
+            y2: ch.y + NH/2,
+            isRoot: nd.isVirtual
+          });
+          walk(ch);
+        }
+      });
+    }
+  }
+  walk(vroot);
+
+  var mxX = 800, mxY = 600;
+  nodes.forEach(function(n) { mxX = Math.max(mxX, n.x + NW + LP); mxY = Math.max(mxY, n.y + NH + TP); });
+  return {nodes: nodes, conns: conns, w: mxX, h: mxY};
+}
+
+function render() {
+  var cont = document.getElementById('treeContainer');
+  var svg = document.getElementById('linesSvg');
+
+  // Clear old nodes
+  var old = cont.querySelectorAll('.person-node,.collapse-btn,.collapse-badge');
+  for (var i = 0; i < old.length; i++) old[i].remove();
+
+  var layout = calcLayout();
+  var nodes = layout.nodes, conns = layout.conns;
+  var total = familyData.people.length;
+
+  // Stats
+  var hidden = 0;
+  for (var k in collapsedNodes) {
+    var nd = familyData.people.filter(function(p){return p.id===k;})[0];
+    if (nd) hidden += countDesc(tmap()[k]);
+  }
+  document.getElementById('statsCount').textContent = total + ' 人';
+
+  if (!nodes.length) return;
+
+  cont.style.width = layout.w + 'px';
+  cont.style.height = layout.h + 'px';
+
+  // Draw SVG lines
+  var paths = '';
+  // SVG defs - warm brown gradient & subtle shadow
+  var defs = '<defs>';
+  defs += '<filter id="warmShadow"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="rgba(100,70,40,0.08)"/></filter>';
+  defs += '<linearGradient id="warmLine" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#b8833a" stop-opacity="0.5"/><stop offset="100%" stop-color="#b8833a" stop-opacity="0.15"/></linearGradient>';
+  defs += '</defs>';
+
+  conns.forEach(function(c) {
+    var mx = (c.x1 + c.x2) / 2;
+    if (c.isRoot) {
+      // Warm brown polyline for root connections
+      var r = 8;
+      var x1=c.x1, y1=c.y1, x2=c.x2, y2=c.y2;
+      var xMid = mx;
+      if (Math.abs(y1-y2) < 2) {
+        paths += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="url(#warmLine)" stroke-width="2" stroke-linecap="round" filter="url(#warmShadow)"/>';
+      } else {
+        paths += '<path d="M'+x1+','+y1+' L'+(xMid-r)+','+y1+' Q'+xMid+','+y1+' '+xMid+','+(y1<y2?y1+r:y1-r)+' L'+xMid+','+(y2<y1?y2+r:y2-r)+' Q'+xMid+','+y2+' '+(xMid+r)+','+y2+' L'+x2+','+y2+'" fill="none" stroke="url(#warmLine)" stroke-width="2" stroke-linecap="round" filter="url(#warmShadow)"/>';
+      }
+    } else {
+      // Subtle warm bezier for child connections
+      var diff = Math.abs(y1 - y2);
+      var opacity = diff < 20 ? 0.3 : 0.18;
+      paths += '<path d="M'+c.x1+','+c.y1+' C'+(c.x1+40)+','+c.y1+' '+(c.x2-40)+','+c.y2+' '+c.x2+','+c.y2+'" fill="none" stroke="rgba(184,131,58,'+opacity+')" stroke-width="1.2" stroke-linecap="round"/>';
+    }
+  });
+  svg.innerHTML = defs + paths;
+  svg.setAttribute('width', layout.w);
+  svg.setAttribute('height', layout.h);
+
+  // Create node elements
+  nodes.forEach(function(n) {
+    var el = document.createElement('div');
+    el.className = 'person-node depth-' + Math.min(n.depth, 10);
+    if (n.id === selectedId) el.classList.add('selected');
+    el.style.left = n.x + 'px';
+    el.style.top = n.y + 'px';
+    el.setAttribute('data-id', n.id);
+
+    var sym = n.gender === 'male' ? '\u2642' : '\u2640';
+    var avtClass = n.gender === 'male' ? 'male' : 'female';
+    var avtHtml = n.photo
+      ? '<div class="avt-mini" style="background-image:url('+n.photo+')"></div>'
+      : '<div class="avt-mini '+avtClass+'">'+sym+'</div>';
+
+    // Spouse line
+    var spouseHtml = '';
+    if (n.spouse) {
+      var sp = null;
+      for (var si = 0; si < familyData.people.length; si++) {
+        if (familyData.people[si].name === n.spouse) { sp = familyData.people[si]; break; }
+      }
+      if (sp) {
+        spouseHtml = '<div class="nm-spouse" onclick="event.stopPropagation();selectPerson(\''+sp.id+'\')"><span class="spouse-heart">\u2665</span>'+esc(n.spouse)+'</div>';
+      } else {
+        spouseHtml = '<div class="nm-spouse"><span class="spouse-heart">\u2665</span>'+esc(n.spouse)+'</div>';
+      }
+    }
+    el.innerHTML = avtHtml + '<div class="nm-wrap"><div class="nm" title="'+esc(n.name)+'">'+esc(n.name)+'</div>' + spouseHtml + '</div>';
+
+    el.addEventListener('click', function(e) { e.stopPropagation(); selectPerson(n.id); });
+    cont.appendChild(el);
+
+    // Collapse badge
+    if (n.collapsed && n.hiddenCount > 0) {
+      var badge = document.createElement('div');
+      badge.className = 'collapse-badge';
+      badge.style.left = (n.x + NW + 4) + 'px';
+      badge.style.top = (n.y + NH/2 - 8) + 'px';
+      badge.textContent = '+' + n.hiddenCount;
+      cont.appendChild(badge);
+    }
+
+    // Collapse button
+    if (n.hasChildren) {
+      var btn = document.createElement('div');
+      btn.className = 'collapse-btn';
+      btn.style.left = (n.x + NW - 8) + 'px';
+      btn.style.top = (n.y + NH/2 - 8) + 'px';
+      btn.textContent = n.collapsed ? '+' : '-';
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (collapsedNodes[n.id]) delete collapsedNodes[n.id];
+        else collapsedNodes[n.id] = true;
+        render();
+      });
+      cont.appendChild(btn);
+    }
+  });
+
+  applyTransform();
+}
+
+function tmap() {
+  var m = {};
+  familyData.people.forEach(function(p) {
+    m[p.id] = Object.assign({}, p, {children: familyData.people.filter(function(c){return c.parentId===p.id;})});
+  });
+  return m;
+}
+
+function toggleCollapse(id) {
+  if (collapsedNodes[id]) delete collapsedNodes[id];
+  else collapsedNodes[id] = true;
+  render();
+}
+function expandAll() { collapsedNodes = {}; render(); }
+function collapseDeep() {
+  var t = buildTree();
+  function mark(nd, d) {
+    if (d >= 3 && nd.children && nd.children.length) collapsedNodes[nd.id] = true;
+    (nd.children||[]).forEach(function(c){ mark(c, d+1); });
+  }
+  t.roots.forEach(function(r){ mark(r, 0); });
+  render();
+}
+
+function applyTransform() {
+  var c = document.getElementById('treeContainer');
+  c.style.transform = 'scale(' + scale + ')';
+}
+function doZoom(dir) {
+  scale = Math.max(0.15, Math.min(3, scale + dir * 0.1));
+  applyTransform();
+}
+function resetView() { scale = 0.75; applyTransform(); }
+
+function selectPerson(id) {
+  selectedId = id;
+  var p = familyData.people.filter(function(x){return x.id===id;})[0];
+  if (!p) return;
+
+  document.getElementById('panelTitle').textContent = '成员档案';
+  document.getElementById('panelActions').style.display = 'flex';
+
+  var avCls = p.gender === 'male' ? 'm' : 'f';
+  var children = familyData.people.filter(function(x){return x.parentId===id;});
+  var parent = p.parentId ? familyData.people.filter(function(x){return x.id===p.parentId;})[0] : null;
+
+  var relHtml = '';
+  if (parent) {
+    relHtml += '<span class="relation-tag parent" onclick="selectPerson(\''+parent.id+'\')">父：'+esc(parent.name)+'</span>';
+    if (parent.spouse) {
+      var mo = familyData.people.filter(function(x){return x.name===parent.spouse && x.gender==='female';})[0];
+      if (mo) relHtml += '<span class="relation-tag parent" onclick="selectPerson(\''+mo.id+'\')">母：'+esc(mo.name)+'</span>';
+    }
+  }
+  if (p.spouse) {
+    var sp = familyData.people.filter(function(x){return x.name===p.spouse;})[0];
+    if (sp) relHtml += '<span class="relation-tag spouse" onclick="selectPerson(\''+sp.id+'\')">配偶：'+esc(p.spouse)+'</span>';
+    else relHtml += '<span class="relation-tag spouse">配偶：'+esc(p.spouse)+'</span>';
+  }
+  children.forEach(function(c) {
+    var s = c.gender==='male' ? '\u2642' : '\u2640';
+    relHtml += '<span class="relation-tag child" onclick="selectPerson(\''+c.id+'\')">'+s+' '+esc(c.name)+'</span>';
+  });
+  if (!relHtml) relHtml = '<span style="font-size:11px;color:#8a7b68">暂无亲属记录</span>';
+
+  var sym = p.gender==='male' ? '\u2642' : '\u2640';
+  var photoAvt = p.photo ? 'style="background-image:url('+p.photo+')"' : '';
+  var avtContent = p.photo ? '' : sym;
+  var lifeInfo = (p.birth||'?') + '年生';
+  if (p.death) lifeInfo += '，' + p.death + '年卒';
+  else lifeInfo += '，在世';
+
+  document.getElementById('panelBody').innerHTML =
+    '<div class="detail-card">' +
+      '<div class="detail-top">' +
+        '<div class="detail-avatar-wrap">' +
+          '<div class="avt-big '+avCls+'" '+photoAvt+'>'+avtContent+'</div>' +
+          '<span class="avatar-gender-tag '+(p.gender==='male'?'gender-m':'gender-f')+'">'+(p.gender==='male'?'男':'女')+'</span>' +
+          '<div><label class="photo-change">换照<input type="file" accept="image/*" onchange="uploadPhoto(event)"></label></div>' +
+        '</div>' +
+        '<div class="detail-info">' +
+          '<div class="person-name">'+esc(p.name)+'</div>' +
+          '<div class="person-subtitle">'+lifeInfo+'</div>' +
+          '<div class="info-grid">' +
+            '<div class="info-item"><div class="info-lbl">现居地</div><div class="info-val">'+esc(p.residence||'—')+'</div></div>' +
+            '<div class="info-item"><div class="info-lbl">职业</div><div class="info-val">'+esc(p.occupation||'—')+'</div></div>' +
+            '<div class="info-item" style="grid-column:1/-1"><div class="info-lbl">联系方式</div><div class="info-val">'+esc(p.contact||'—')+'</div></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="detail-section"><div class="sec-title">亲属关系</div><div class="relation-list">'+relHtml+'</div></div>' +
+      '<div class="detail-section"><div class="sec-title">生平事迹</div>' +
+        (p.notes ? '<div class="note-block">'+esc(p.notes)+'</div>' : '<div class="note-block" style="color:#8a7b68">点击编辑添加生平事迹</div>') +
+      '</div>' +
+    '</div>';
+
+  document.getElementById('detailPanel').classList.add('open');
+
+  // Highlight selected node
+  var allNodes = document.querySelectorAll('.person-node');
+  for (var i = 0; i < allNodes.length; i++) {
+    allNodes[i].classList.toggle('selected', allNodes[i].getAttribute('data-id') === id);
+  }
+}
+
+function closePanel() {
+  selectedId = null;
+  document.getElementById('detailPanel').classList.remove('open');
+  document.getElementById('panelTitle').textContent = '家族成员';
+  document.getElementById('panelActions').style.display = 'none';
+  document.getElementById('panelBody').innerHTML = '<div class="empty"><span class="ico">&#128100;</span><p>点击人物查看详情</p></div>';
+  var allNodes = document.querySelectorAll('.person-node');
+  for (var i = 0; i < allNodes.length; i++) allNodes[i].classList.remove('selected');
+}
+
+function uploadPhoto(e) {
+  var f = e.target.files[0];
+  if (!f) return;
+  if (f.size > 2*1024*1024) { alert('照片不超过2MB'); return; }
+  var r = new FileReader();
+  r.onload = function(ev) {
+    var p = familyData.people.filter(function(x){return x.id===selectedId;})[0];
+    if (p) { p.photo = ev.target.result; saveData(); selectPerson(selectedId); render(); }
+  };
+  r.readAsDataURL(f);
+}
+
+function handleAdd(parentId) {
+  editId = null;
+  editParentId = parentId;
+  showForm(parentId ? '添加子女' : '添加先祖', null);
+}
+function handleEdit() {
+  if (!selectedId) return;
+  editId = selectedId;
+  editParentId = null;
+  var p = familyData.people.filter(function(x){return x.id===selectedId;})[0];
+  showForm('编辑 ' + p.name, p);
+}
+function handleDelete() {
+  if (!selectedId) return;
+  var p = familyData.people.filter(function(x){return x.id===selectedId;})[0];
+  if (!p) return;
+  var children = familyData.people.filter(function(x){return x.parentId===selectedId;});
+  var msg = children.length
+    ? '"'+p.name+'" 有 '+children.length+' 个子女，删除后子女将失去关联。确定？'
+    : '确定删除 "'+p.name+'"？';
+  if (!confirm(msg)) return;
+  familyData.people.forEach(function(x) { if (x.parentId===selectedId) x.parentId=null; });
+  familyData.people = familyData.people.filter(function(x){return x.id!==selectedId;});
+  saveData(); closePanel(); render();
+}
+
+function showForm(title, person) {
+  var d = person || {name:'',gender:'male',birth:'',death:'',residence:'',occupation:'',contact:'',spouse:'',notes:'',photo:''};
+  editPhoto = d.photo || null;
+  var sym = d.gender==='male' ? '\u2642' : '\u2640';
+  var avCls = d.gender==='male' ? 'm' : 'f';
+  var photoStyle = d.photo ? 'style="background-image:url('+d.photo+')"' : '';
+  var avtInner = d.photo ? '' : sym;
+
+  document.getElementById('modalBox').innerHTML =
+    '<div class="modal-ov" onclick="closeModal(event)">' +
+      '<div class="modal" onclick="event.stopPropagation()">' +
+        '<h3>'+esc(title)+'</h3>' +
+        '<div style="text-align:center;margin-bottom:10px">' +
+          '<div class="avt-big '+avCls+'" id="previewAvt" '+photoStyle+'>'+avtInner+'</div>' +
+          '<label style="display:inline-block;margin-top:4px;font-size:9px;color:#8a7b68;cursor:pointer;border:1px dashed #c8b898;border-radius:3px;padding:2px 8px">上传照片 <input type="file" accept="image/*" onchange="previewPhoto(event)" style="display:none"></label>' +
+        '</div>' +
+        '<div class="fr"><div class="fg"><label>姓名 *</label><input id="fName" value="'+esc(d.name)+'" placeholder="姓名"></div>' +
+        '<div class="fg"><label>性别</label><select id="fGender"><option value="male"'+(d.gender==='male'?' selected':'')+'>男</option><option value="female"'+(d.gender==='female'?' selected':'')+'>女</option></select></div></div>' +
+        '<div class="fr"><div class="fg"><label>出生年份</label><input id="fBirth" value="'+esc(d.birth||'')+'" placeholder="如1950"></div>' +
+        '<div class="fg"><label>逝世年份</label><input id="fDeath" value="'+esc(d.death||'')+'" placeholder="如2020"></div></div>' +
+        '<div class="fg"><label>现居地</label><input id="fResidence" value="'+esc(d.residence||'')+'" placeholder="省/市/区"></div>' +
+        '<div class="fr"><div class="fg"><label>职业</label><input id="fOccupation" value="'+esc(d.occupation||'')+'" placeholder="职业"></div>' +
+        '<div class="fg"><label>联系方式</label><input id="fContact" value="'+esc(d.contact||'')+'" placeholder="电话/微信"></div></div>' +
+        '<div class="fg"><label>配偶姓名</label><input id="fSpouse" value="'+esc(d.spouse||'')+'" placeholder="配偶"></div>' +
+        '<div class="fg"><label>备注</label><textarea id="fNotes" rows="2">'+esc(d.notes||'')+'</textarea></div>' +
+        '<div class="ma"><button class="btn btn-o" onclick="closeModal()">取消</button><button class="btn btn-p" onclick="savePerson()">保存</button></div>' +
+      '</div>' +
+    '</div>';
+}
+
+function previewPhoto(e) {
+  var f = e.target.files[0];
+  if (!f) return;
+  if (f.size > 2*1024*1024) { alert('不超过2MB'); return; }
+  var r = new FileReader();
+  r.onload = function(ev) {
+    editPhoto = ev.target.result;
+    var av = document.getElementById('previewAvt');
+    if (av) { av.style.backgroundImage = 'url('+editPhoto+')'; av.textContent = ''; }
+  };
+  r.readAsDataURL(f);
+}
+
+function savePerson() {
+  var name = document.getElementById('fName').value.trim();
+  if (!name) { alert('请输入姓名'); return; }
+  if (editId) {
+    // Editing existing person: preserve parentId from original record
+    var idx = -1;
+    for (var i = 0; i < familyData.people.length; i++) {
+      if (familyData.people[i].id === editId) { idx = i; break; }
+    }
+    if (idx >= 0) {
+      var orig = familyData.people[idx];
+      orig.name = name;
+      orig.gender = document.getElementById('fGender').value;
+      orig.birth = document.getElementById('fBirth').value.trim();
+      orig.death = document.getElementById('fDeath').value.trim() || null;
+      orig.residence = document.getElementById('fResidence').value.trim();
+      orig.occupation = document.getElementById('fOccupation').value.trim();
+      orig.contact = document.getElementById('fContact').value.trim();
+      orig.spouse = document.getElementById('fSpouse').value.trim() || null;
+      orig.notes = document.getElementById('fNotes').value.trim();
+      if (editPhoto) orig.photo = editPhoto;
+    }
+  } else {
+    // Adding new person: use editParentId
+    var pd = {
+      id: 'p' + Date.now(),
+      name: name,
+      gender: document.getElementById('fGender').value,
+      birth: document.getElementById('fBirth').value.trim(),
+      death: document.getElementById('fDeath').value.trim() || null,
+      residence: document.getElementById('fResidence').value.trim(),
+      occupation: document.getElementById('fOccupation').value.trim(),
+      contact: document.getElementById('fContact').value.trim(),
+      spouse: document.getElementById('fSpouse').value.trim() || null,
+      notes: document.getElementById('fNotes').value.trim(),
+      photo: editPhoto || '',
+      parentId: editParentId
+    };
+    familyData.people.push(pd);
+  }
+  saveData();
+  editPhoto = null;
+  closeModal();
+  render();
+  if (editId) selectPerson(editId);
+}
+
+function closeModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('modalBox').innerHTML = '';
+  editId = null;
+  editParentId = null;
+  editPhoto = null;
+}
+
+function esc(s) {
+  if (!s) return '';
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function searchPerson() {
+  var q = prompt('请输入姓名：');
+  if (!q || !q.trim()) return;
+  var q2 = q.trim();
+  var found = familyData.people.filter(function(p){return p.name.indexOf(q2)>=0;});
+  if (!found.length) { alert('未找到 "'+q2+'"'); return; }
+  // Expand all ancestors
+  found.forEach(function(p) {
+    var cur = p;
+    while (cur && cur.parentId) {
+      delete collapsedNodes[cur.parentId];
+      cur = familyData.people.filter(function(x){return x.id===cur.parentId;})[0];
+    }
+  });
+  render();
+  if (found.length === 1) { selectPerson(found[0].id); return; }
+  var list = found.map(function(p,i){return (i+1)+'. '+p.name;}).join('\n');
+  var idx = parseInt(prompt('找到 '+found.length+' 人：\n'+list+'\n\n输入序号：'));
+  if (idx >= 1 && idx <= found.length) selectPerson(found[idx-1].id);
+}
+
+// Mouse drag panning
+var treeArea = document.getElementById('treeArea');
+treeArea.addEventListener('mousedown', function(e) {
+  if (e.button !== 0) return;
+  if (e.target.closest('.person-node') || e.target.closest('.collapse-btn')) return;
+  isPanning = true;
+  panX = e.clientX;
+  panY = e.clientY;
+  treeArea.style.cursor = 'grabbing';
+});
+document.addEventListener('mousemove', function(e) {
+  if (!isPanning) return;
+  e.preventDefault();
+  treeArea.scrollLeft -= (e.clientX - panX);
+  treeArea.scrollTop -= (e.clientY - panY);
+  panX = e.clientX;
+  panY = e.clientY;
+});
+document.addEventListener('mouseup', function() {
+  isPanning = false;
+  treeArea.style.cursor = 'grab';
+});
+
+// Ctrl+Wheel zoom
+treeArea.addEventListener('wheel', function(e) {
+  if (e.ctrlKey) {
+    e.preventDefault();
+    doZoom(e.deltaY < 0 ? 1 : -1);
+  }
+}, {passive: false});
+
+// Keyboard
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    if (document.getElementById('modalBox').innerHTML) closeModal();
+    else closePanel();
+  }
+});
+
+// Click background to close panel
+treeArea.addEventListener('click', function(e) {
+  if (!e.target.closest('.person-node') && !e.target.closest('.collapse-btn')) closePanel();
+});
+
+// Init
+familyData = loadData();
+render();
+</script>
+</body>
+</html>

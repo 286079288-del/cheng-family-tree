@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家族记忆 - 东郭程氏族谱</title>
+<style>
+:root {
+  --bg: #f0e6d0;
+  --bg-grad-start: #f5efe0;
+  --bg-grad-end: #e8dcc8;
+  --card-bg: rgba(255,253,248,0.92);
+  --text: #3d3025;
+  --text-light: #8a7b68;
+  --accent: #8b2e2e;
+  --gold: #b8833a;
+  --gold-light: #d4a860;
+  --line: #c4b8a0;
+  --shadow: 0 4px 20px rgba(100,70,40,0.08);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: "Noto Serif SC","STSong","SimSun","KaiTi","楷体",serif;
+  background: linear-gradient(180deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
+  color: var(--text); min-height:100vh; display:flex; flex-direction:column;
+}
+
+/* 顶栏 */
+.topbar {
+  background: rgba(255,255,255,0.25); backdrop-filter: blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(200,180,150,0.3);
+  padding:10px 28px; position:sticky; top:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+}
+.topbar h1 { font-size:16px; letter-spacing:5px; display:flex; align-items:center; gap:10px; color: var(--text); }
+.topbar h1 .seal {
+  width:30px; height:30px; border:2px solid var(--gold); border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; color: var(--gold); font-weight:700; background:rgba(184,131,58,0.08);
+}
+.topbar-actions { display:flex; gap:6px; align-items:center; }
+.back-link {
+  font-size:12px; color: var(--text-light); text-decoration:none;
+  display:flex; align-items:center; gap:6px; transition:all .2s; letter-spacing:1px;
+}
+.back-link:hover { color: var(--accent); }
+.btn {
+  padding:6px 16px; border-radius:6px; border:none; font-family:inherit;
+  font-size:12px; cursor:pointer; transition:all .2s; letter-spacing:1px;
+}
+.btn-gold { background:linear-gradient(135deg, var(--gold), #9a6a28); color:#fff; font-weight:600; }
+.btn-gold:hover { background:linear-gradient(135deg, var(--gold-light), var(--gold)); transform:translateY(-1px); }
+.btn-o { background:rgba(184,131,58,0.06); color:var(--text-light); border:1px solid rgba(184,131,58,0.18); }
+.btn-o:hover { background:rgba(184,131,58,0.12); color:var(--gold); border-color:rgba(184,131,58,0.35); }
+
+/* 横向时间轴区域 */
+.timeline-area {
+  flex:1; position:relative; overflow:hidden;
+}
+.timeline-scroll {
+  position:absolute; inset:0; overflow-x:auto; overflow-y:hidden;
+  cursor:grab; scroll-behavior:smooth;
+  -webkit-overflow-scrolling: touch;
+}
+.timeline-scroll:active { cursor:grabbing; }
+.timeline-scroll::-webkit-scrollbar { height:8px; }
+.timeline-scroll::-webkit-scrollbar-track { background:rgba(200,180,150,0.15); border-radius:4px; }
+.timeline-scroll::-webkit-scrollbar-thumb { background:rgba(184,131,58,0.3); border-radius:4px; }
+.timeline-scroll::-webkit-scrollbar-thumb:hover { background:rgba(184,131,58,0.5); }
+
+/* 时间轴画布 */
+.timeline-canvas {
+  position:relative; min-height:100%; min-width:100%;
+  padding:30px 80px;
+}
+
+/* 横向中轴线 */
+.timeline-canvas::before {
+  content:''; position:absolute;
+  top:50%; left:60px; right:60px; height:2px;
+  background: linear-gradient(90deg, transparent, var(--line) 3%, var(--line) 97%, transparent);
+  transform:translateY(-50%);
+  z-index:1;
+}
+
+/* 时间轴条目 */
+.timeline-item {
+  position:absolute; width:220px;
+  animation: fadeInUp .5s ease both;
+}
+/* 上方卡片 */
+.timeline-item.above {
+  bottom: calc(50% + 20px);
+  text-align:center;
+}
+/* 下方卡片 */
+.timeline-item.below {
+  top: calc(50% + 20px);
+  text-align:center;
+}
+
+/* 竖连接线 */
+.timeline-stem {
+  position:absolute; width:2px; background:var(--line); left:50%; transform:translateX(-50%);
+}
+.timeline-item.above .timeline-stem {
+  bottom:-20px; height:20px;
+  background: linear-gradient(180deg, var(--line), rgba(184,131,58,0.15));
+}
+.timeline-item.below .timeline-stem {
+  top:-20px; height:20px;
+  background: linear-gradient(0deg, var(--line), rgba(184,131,58,0.15));
+}
+
+/* 时间轴圆点 */
+.timeline-dot {
+  position:absolute; left:50%; width:16px; height:16px;
+  border-radius:50%; background:#fff; border:3px solid var(--gold);
+  box-shadow:0 0 0 5px rgba(184,131,58,0.08);
+  transform:translateX(-50%); z-index:5;
+}
+.timeline-item.above .timeline-dot { bottom:-28px; }
+.timeline-item.below .timeline-dot { top:-28px; }
+
+/* 年份标签（中轴线上） */
+.timeline-year {
+  position:absolute; left:50%; transform:translateX(-50%);
+  font-size:11px; font-weight:700; color:var(--gold); letter-spacing:1px;
+  background:rgba(255,253,248,0.9); padding:2px 10px; border-radius:10px;
+  border:1px solid rgba(184,131,58,0.15); white-space:nowrap; z-index:6;
+}
+.timeline-item.above .timeline-year { bottom:-46px; }
+.timeline-item.below .timeline-year { top:-46px; }
+
+/* 事件卡片 */
+.timeline-card {
+  background: var(--card-bg);
+  border:1px solid rgba(200,180,150,0.35);
+  border-radius:12px;
+  padding:16px 14px;
+  cursor:pointer; transition:all .3s;
+  box-shadow: 0 2px 12px rgba(100,70,40,0.06);
+  position:relative; overflow:hidden;
+  text-align:left;
+}
+.timeline-card:hover {
+  transform:translateY(-3px);
+  box-shadow: 0 8px 28px rgba(100,70,40,0.1);
+  border-color: rgba(184,131,58,0.3);
+}
+.timeline-item.below .timeline-card:hover { transform:translateY(3px); }
+
+/* 卡片顶部装饰线 */
+.timeline-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+}
+
+/* 照片 */
+.timeline-card .card-photo {
+  width:100%; height:100px; border-radius:8px; margin-bottom:10px;
+  background-size:cover; background-position:center;
+  border:1px solid rgba(200,180,150,0.2);
+}
+
+/* 标题 */
+.timeline-card .card-title {
+  font-size:14px; font-weight:700; letter-spacing:2px;
+  color:var(--text); margin-bottom:5px;
+}
+
+/* 描述 */
+.timeline-card .card-desc {
+  font-size:11px; color:var(--text-light); line-height:1.7;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+}
+
+/* 删除提示 */
+.timeline-card .card-delete {
+  position:absolute; top:10px; right:10px;
+  width:22px; height:22px; border-radius:50%;
+  background:rgba(180,60,60,0.06); color:#c06060;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; opacity:0; transition:all .2s;
+  border:1px solid rgba(180,60,60,0.1);
+}
+.timeline-card:hover .card-delete { opacity:1; }
+.timeline-card .card-delete:hover { background:rgba(180,60,60,0.12); }
+
+/* 空状态 */
+.empty-state {
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; color: var(--text-light);
+}
+.empty-state .icon { font-size:60px; opacity:0.3; margin-bottom:16px; }
+.empty-state p { font-size:14px; letter-spacing:2px; }
+
+/* 底部操作栏 */
+.bottom-bar {
+  position:sticky; bottom:0; z-index:100;
+  background: rgba(255,255,255,0.25); backdrop-filter: blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-top:1px solid rgba(200,180,150,0.3);
+  padding:10px 28px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+}
+.scroll-hint {
+  font-size:11px; color:var(--text-light); letter-spacing:1px;
+  display:flex; align-items:center; gap:6px;
+}
+.scroll-hint .arrow { animation:slideRight 1.5s infinite; }
+
+/* 模态框 */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(60,50,35,0.5); z-index:200;
+  display:none; align-items:center; justify-content:center;
+  animation:fadeIn .2s;
+}
+.modal-overlay.active { display:flex; }
+.modal {
+  background: var(--card-bg); border-radius:16px; padding:28px;
+  width:90%; max-width:480px; max-height:85vh; overflow-y:auto;
+  box-shadow:0 24px 64px rgba(0,0,0,0.25); border:1px solid rgba(200,180,150,0.35);
+  backdrop-filter: blur(10px);
+}
+.modal h3 { font-size:18px; text-align:center; letter-spacing:3px; margin-bottom:20px; color: var(--text); }
+.form-group { margin-bottom:14px; }
+.form-group label { display:block; font-size:11px; color: var(--text-light); margin-bottom:4px; letter-spacing:1px; }
+.form-group input, .form-group textarea, .form-group select {
+  width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px;
+  background:rgba(255,255,255,0.6); font-family:inherit; font-size:13px; color: var(--text);
+  transition:all .2s;
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+  outline:none; border-color: var(--gold); box-shadow:0 0 0 3px rgba(184,131,58,0.08);
+}
+.date-row { display:flex; gap:10px; }
+.date-row .form-group { flex:1; }
+
+.image-preview-wrap { display:flex; justify-content:center; margin-bottom:16px; }
+.image-preview {
+  width:90px; height:90px; border-radius:12px;
+  background-size:cover; background-position:center;
+  border:2px dashed var(--line); display:flex; align-items:center; justify-content:center;
+  color: var(--text-light); font-size:32px; cursor:pointer; overflow:hidden; transition:all .2s;
+}
+.image-preview:hover { border-color: var(--gold); }
+.modal-actions { display:flex; gap:10px; margin-top:20px; justify-content:flex-end; }
+.btn-cancel { background:#e8dcc8; color: var(--text); }
+.btn-cancel:hover { background:#d8ccc0; }
+.btn-save { background: var(--gold); color: #fff; }
+.btn-save:hover { background:#c9954a; }
+
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes slideRight { 0%,100%{transform:translateX(0)} 50%{transform:translateX(6px)} }
+
+@media(max-width:768px) {
+  .timeline-canvas { padding:20px 30px; }
+  .timeline-canvas::before { left:20px; right:20px; }
+  .timeline-item { width:160px; }
+  .timeline-card .card-photo { height:80px; }
+  .topbar-actions { gap:3px; }
+  .btn { padding:5px 10px; font-size:11px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1><span class="seal">程</span>家族记忆</h1>
+  <div class="topbar-actions">
+    <button class="btn btn-gold" onclick="openModal()">+ 添加记忆</button>
+    <a href="family-tree.html" class="btn btn-o" style="text-decoration:none">&#8592; 家谱</a>
+  </div>
+</div>
+
+<div class="timeline-area">
+  <div class="timeline-scroll" id="timelineScroll">
+    <div class="timeline-canvas" id="timelineCanvas">
+      <!-- 动态生成 -->
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <div class="scroll-hint"><span class="arrow">&#10140;</span> 左右拖拽或滚动浏览时间轴</div>
+  <div style="font-size:11px;color:var(--text-light)">共 <b id="memCount">0</b> 条记忆</div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>添加家族记忆</h3>
+    <div class="image-preview-wrap">
+      <div class="image-preview" id="imgPreview" onclick="document.getElementById('imgInput').click()">
+        <span>+</span>
+      </div>
+    </div>
+    <input type="file" id="imgInput" accept="image/*" onchange="previewImg(event)" style="display:none">
+    <div class="date-row">
+      <div class="form-group">
+        <label>年份 *</label>
+        <input type="number" id="mYear" min="1800" max="2099" placeholder="如 1950" style="width:100%">
+      </div>
+      <div class="form-group">
+        <label>月份</label>
+        <select id="mMonth">
+          <option value="">不详</option>
+          <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option>
+          <option value="4">4月</option><option value="5">5月</option><option value="6">6月</option>
+          <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
+          <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>日期</label>
+        <select id="mDay">
+          <option value="">不详</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>标题 *</label>
+      <input type="text" id="mTitle" placeholder="如：家族迁徙、重要成就...">
+    </div>
+    <div class="form-group">
+      <label>描述</label>
+      <textarea id="mDesc" rows="3" placeholder="记录这个故事的详细内容..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn btn-save" onclick="saveMemory()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var SK = 'cheng_family_memories_v3';
+var memories = JSON.parse(localStorage.getItem(SK)) || [
+  {id:1, title:'家族迁徙', year:1808, month:'', day:'', desc:'程礼信先祖从外地迁至东郭，奠定家族基业。', image:''},
+  {id:2, title:'设立家谱', year:1877, month:'', day:'', desc:'程礼信晚年主持编修家谱，记录家族世系传承。', image:''},
+  {id:3, title:'光复祖业', year:1950, month:'', day:'', desc:'程德瑞重振家族声望，在当地享有盛誉。', image:''},
+  {id:4, title:'重要成就', year:2010, month:'', day:'', desc:'家族在各行各业取得卓越成就。', image:''},
+  {id:5, title:'家族团聚', year:2012, month:'', day:'', desc:'全族齐聚祭祖，共叙亲情，场面盛大。', image:''},
+  {id:6, title:'教育兴族', year:2021, month:'', day:'', desc:'家族设立教育基金，鼓励后辈读书成才。', image:''}
+];
+
+var CARD_W = 220;  // card width
+var GAP = 50;      // gap between cards
+var STEP = CARD_W + GAP; // step per card
+
+// Populate day dropdown
+function updateDays() {
+  var m = parseInt(document.getElementById('mMonth').value) || 0;
+  var y = parseInt(document.getElementById('mYear').value) || 2025;
+  var sel = document.getElementById('mDay');
+  var cur = sel.value;
+  var maxDay = m ? new Date(y, m, 0).getDate() : 31;
+  sel.innerHTML = '<option value="">不详</option>';
+  for (var i = 1; i <= maxDay; i++) {
+    sel.innerHTML += '<option value="'+i+'">'+i+'日</option>';
+  }
+  if (cur && parseInt(cur) <= maxDay) sel.value = cur;
+}
+document.getElementById('mMonth').addEventListener('change', updateDays);
+document.getElementById('mYear').addEventListener('input', updateDays);
+
+function formatDate(m) {
+  var s = m.year + '年';
+  if (m.month) s += m.month + '月';
+  if (m.day) s += m.day + '日';
+  return s;
+}
+
+function sortKey(m) {
+  return (m.year || 0) * 10000 + (parseInt(m.month) || 0) * 100 + (parseInt(m.day) || 0);
+}
+
+function render() {
+  var canvas = document.getElementById('timelineCanvas');
+  document.getElementById('memCount').textContent = memories.length;
+
+  if (!memories.length) {
+    canvas.innerHTML = '<div class="empty-state"><div class="icon">&#128220;</div><p>暂无家族记忆，点击添加</p></div>';
+    return;
+  }
+
+  var sorted = memories.slice().sort(function(a,b){ return sortKey(a) - sortKey(b); });
+  var count = sorted.length;
+  var totalW = count * STEP + 160;
+
+  canvas.style.width = totalW + 'px';
+  canvas.style.minHeight = '100%';
+
+  var html = '';
+  sorted.forEach(function(item, i) {
+    var isAbove = i % 2 === 0;
+    var cls = isAbove ? 'above' : 'below';
+    var left = 80 + i * STEP;
+
+    html += '<div class="timeline-item '+cls+'" style="left:'+left+'px;animation-delay:'+(i*0.08)+'s">';
+    // Stem
+    html += '<div class="timeline-stem"></div>';
+    // Dot
+    html += '<div class="timeline-dot"></div>';
+    // Year label
+    html += '<div class="timeline-year">'+esc(formatDate(item))+'</div>';
+    // Card
+    html += '<div class="timeline-card" onclick="editMemory('+item.id+')">';
+    html += '<div class="card-delete" onclick="event.stopPropagation();deleteMemory('+item.id+')">&#10005;</div>';
+    if (item.image) {
+      html += '<div class="card-photo" style="background-image:url('+item.image+')"></div>';
+    }
+    html += '<div class="card-title">'+esc(item.title)+'</div>';
+    if (item.desc) {
+      html += '<div class="card-desc">'+esc(item.desc)+'</div>';
+    }
+    html += '</div>'; // card
+    html += '</div>'; // item
+  });
+
+  canvas.innerHTML = html;
+}
+
+function esc(s) { if(!s) return ''; var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+function openModal() {
+  document.getElementById('modal').classList.add('active');
+  document.getElementById('mTitle').value = '';
+  document.getElementById('mYear').value = '';
+  document.getElementById('mMonth').value = '';
+  document.getElementById('mDay').innerHTML = '<option value="">不详</option>';
+  document.getElementById('mDesc').value = '';
+  document.getElementById('imgPreview').style.backgroundImage = '';
+  document.getElementById('imgPreview').innerHTML = '<span>+</span>';
+}
+function closeModal() { document.getElementById('modal').classList.remove('active'); }
+
+function previewImg(e) {
+  var f = e.target.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function(ev) {
+    var p = document.getElementById('imgPreview');
+    p.style.backgroundImage = 'url('+ev.target.result+')';
+    p.innerHTML = '';
+  };
+  r.readAsDataURL(f);
+}
+
+function saveMemory() {
+  var title = document.getElementById('mTitle').value.trim();
+  var year = parseInt(document.getElementById('mYear').value);
+  if (!title && !year) { alert('请输入标题或年份'); return; }
+  var desc = document.getElementById('mDesc').value.trim() || '';
+  var month = document.getElementById('mMonth').value || '';
+  var day = document.getElementById('mDay').value || '';
+  var img = document.getElementById('imgPreview').style.backgroundImage;
+  img = img ? img.replace(/^url\(["']?/, '').replace(/["']?\)$/, '') : '';
+
+  memories.push({
+    id: Date.now(),
+    title: title || (year ? year+'年' : '未命名'),
+    year: year || 0,
+    month: month,
+    day: day,
+    desc: desc,
+    image: img
+  });
+  localStorage.setItem(SK, JSON.stringify(memories));
+  render(); closeModal();
+  // Scroll to the right (newest)
+  setTimeout(function() {
+    var sc = document.getElementById('timelineScroll');
+    sc.scrollLeft = sc.scrollWidth;
+  }, 100);
+}
+
+function editMemory(id) {
+  var item = memories.filter(function(m){return m.id===id;})[0];
+  if (!item) return;
+  // Open modal pre-filled for editing
+  document.getElementById('modal').classList.add('active');
+  document.getElementById('mTitle').value = item.title || '';
+  document.getElementById('mYear').value = item.year || '';
+  document.getElementById('mMonth').value = item.month || '';
+  updateDays();
+  if (item.day) document.getElementById('mDay').value = item.day;
+  document.getElementById('mDesc').value = item.desc || '';
+  if (item.image) {
+    document.getElementById('imgPreview').style.backgroundImage = 'url('+item.image+')';
+    document.getElementById('imgPreview').innerHTML = '';
+  }
+  // Mark as edit
+  document.getElementById('modal').setAttribute('data-edit-id', id);
+}
+
+function deleteMemory(id) {
+  if (!confirm('确定删除这条记忆？')) return;
+  memories = memories.filter(function(m) { return m.id !== id; });
+  localStorage.setItem(SK, JSON.stringify(memories));
+  render();
+}
+
+window.onclick = function(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+};
+
+// Drag scroll
+(function() {
+  var el = document.getElementById('timelineScroll');
+  var isDown = false, startX, scrollLeft;
+  el.addEventListener('mousedown', function(e) {
+    if (e.target.closest('.timeline-card') || e.target.closest('.card-delete')) return;
+    isDown = true; startX = e.pageX - el.offsetLeft; scrollLeft = el.scrollLeft;
+    el.style.cursor = 'grabbing';
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (!isDown) return; e.preventDefault();
+    var x = e.pageX - el.offsetLeft;
+    el.scrollLeft = scrollLeft - (x - startX);
+  });
+  document.addEventListener('mouseup', function() {
+    isDown = false; el.style.cursor = 'grab';
+  });
+  // Wheel horizontal scroll
+  el.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    el.scrollLeft += e.deltaY || e.deltaX;
+  }, {passive:false});
+})();
+
+// Override saveMemory to support edit
+var _origSave = saveMemory;
+saveMemory = function() {
+  var editId = document.getElementById('modal').getAttribute('data-edit-id');
+  if (editId) {
+    var id = parseInt(editId);
+    var item = memories.filter(function(m){return m.id===id;})[0];
+    if (item) {
+      var title = document.getElementById('mTitle').value.trim();
+      var year = parseInt(document.getElementById('mYear').value);
+      item.title = title || (year ? year+'年' : '未命名');
+      item.year = year || 0;
+      item.month = document.getElementById('mMonth').value || '';
+      item.day = document.getElementById('mDay').value || '';
+      item.desc = document.getElementById('mDesc').value.trim() || '';
+      var img = document.getElementById('imgPreview').style.backgroundImage;
+      img = img ? img.replace(/^url\(["']?/, '').replace(/["']?\)$/, '') : '';
+      if (img) item.image = img;
+      localStorage.setItem(SK, JSON.stringify(memories));
+      document.getElementById('modal').removeAttribute('data-edit-id');
+      render(); closeModal();
+      return;
+    }
+  }
+  _origSave();
+};
+
+render();
+</script>
+</body>
+</html>
