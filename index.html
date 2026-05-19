@@ -691,9 +691,12 @@ function selectPerson(id) {
           '<div class="person-name">'+esc(p.name)+'</div>' +
           '<div class="person-subtitle">'+lifeInfo+'</div>' +
           '<div class="info-grid">' +
+            '<div class="info-item"><div class="info-lbl">出生年份</div><div class="info-val">'+esc(p.birth||'—')+'</div></div>' +
+            '<div class="info-item"><div class="info-lbl">逝世年份</div><div class="info-val">'+esc(p.death||'—')+'</div></div>' +
+            '<div class="info-item"><div class="info-lbl">配偶</div><div class="info-val">'+esc(p.spouse||'—')+'</div></div>' +
             '<div class="info-item"><div class="info-lbl">现居地</div><div class="info-val">'+esc(p.residence||'—')+'</div></div>' +
             '<div class="info-item"><div class="info-lbl">职业</div><div class="info-val">'+esc(p.occupation||'—')+'</div></div>' +
-            '<div class="info-item" style="grid-column:1/-1"><div class="info-lbl">联系方式</div><div class="info-val">'+esc(p.contact||'—')+'</div></div>' +
+            '<div class="info-item"><div class="info-lbl">联系方式</div><div class="info-val">'+esc(p.contact||'—')+'</div></div>' +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -701,6 +704,7 @@ function selectPerson(id) {
       '<div class="detail-section"><div class="sec-title">生平事迹</div>' +
         (p.notes ? '<div class="note-block">'+esc(p.notes)+'</div>' : '<div class="note-block" style="color:#8a7b68">点击编辑添加生平事迹</div>') +
       '</div>' +
+      '<div style="text-align:center;padding-top:8px"><button class="btn btn-p" onclick="handleEdit()" style="padding:8px 24px;font-size:13px;letter-spacing:2px">编辑此成员</button></div>' +
     '</div>';
 
   document.getElementById('detailPanel').classList.add('open');
