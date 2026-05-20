@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生辰忌辰 - 东郭程氏族谱</title>
+<style>
+:root{--bg:#f0e6d0;--bg-grad:#f5efe0;--gold:#b8833a;--gold-light:#d4a860;--text:#3d3025;--text-light:#8a7b68;--accent:#8b2e2e;--male:#92b4cc;--female:#c898a5;--male-light:#d0e4f0;--female-light:#f0d8de;--card-bg:rgba(255,253,248,0.92)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Noto Serif SC","STSong","SimSun","KaiTi",serif;background:linear-gradient(180deg,var(--bg-grad),var(--bg));color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+
+.topbar{background:rgba(255,255,255,0.25);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(200,180,150,0.3);padding:10px 28px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar h1{font-size:16px;letter-spacing:5px;display:flex;align-items:center;gap:10px;color:var(--text)}
+.topbar h1 .seal{width:30px;height:30px;border:2px solid var(--gold);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--gold);font-weight:700;background:rgba(184,131,58,0.08)}
+.topbar-actions{display:flex;gap:6px;align-items:center}
+.back-link{font-size:12px;color:var(--text-light);text-decoration:none;display:flex;align-items:center;gap:6px;transition:all .2s;letter-spacing:1px}
+.back-link:hover{color:var(--accent)}
+
+.content{flex:1;max-width:1100px;margin:0 auto;width:100%;padding:24px 20px}
+
+/* 月份导航 */
+.month-nav{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:28px}
+.month-nav .arrow{width:36px;height:36px;border-radius:50%;border:1px solid rgba(184,131,58,0.25);background:rgba(255,253,248,0.9);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--gold);transition:all .2s}
+.month-nav .arrow:hover{background:var(--gold);color:#fff;border-color:var(--gold)}
+.month-nav .month-label{font-size:22px;letter-spacing:6px;font-weight:600;color:var(--text)}
+.month-nav .year-label{font-size:13px;color:var(--text-light);letter-spacing:2px;margin-top:2px;text-align:center}
+
+/* 日历网格 */
+.calendar{background:var(--card-bg);border-radius:16px;box-shadow:0 4px 24px rgba(100,70,40,0.08);border:1px solid rgba(184,131,58,0.12);overflow:hidden;margin-bottom:32px}
+.cal-header{display:grid;grid-template-columns:repeat(7,1fr);background:linear-gradient(135deg,rgba(184,131,58,0.08),rgba(184,131,58,0.04));border-bottom:1px solid rgba(184,131,58,0.1)}
+.cal-header .hd{padding:10px 4px;text-align:center;font-size:12px;letter-spacing:2px;color:var(--text-light);font-weight:600}
+.cal-header .hd.sun{color:var(--accent)}
+.cal-body{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-cell{min-height:90px;border-right:1px solid rgba(184,131,58,0.06);border-bottom:1px solid rgba(184,131,58,0.06);padding:4px 6px;position:relative;transition:background .2s}
+.cal-cell:nth-child(7n){border-right:none}
+.cal-cell:hover{background:rgba(184,131,58,0.04)}
+.cal-cell.other-month{opacity:0.3}
+.cal-cell.today{background:rgba(184,131,58,0.06)}
+.cal-cell .day-num{font-size:13px;font-weight:600;color:var(--text-light);margin-bottom:3px;display:inline-block;min-width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%}
+.cal-cell.today .day-num{background:var(--gold);color:#fff}
+.cal-cell .day-num.sun{color:var(--accent)}
+.cal-cell .events{display:flex;flex-direction:column;gap:2px}
+.event-tag{font-size:10px;padding:2px 6px;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:all .2s;letter-spacing:0.5px;line-height:1.4}
+.event-tag.birth-male{background:var(--male-light);color:#4a6e84;border-left:2px solid var(--male)}
+.event-tag.birth-female{background:var(--female-light);color:#7a4a5a;border-left:2px solid var(--female)}
+.event-tag.death-male{background:rgba(139,46,46,0.06);color:#7a4040;border-left:2px solid var(--accent)}
+.event-tag.death-female{background:rgba(139,46,46,0.06);color:#7a4a5a;border-left:2px solid var(--accent)}
+.event-tag:hover{transform:scale(1.04);box-shadow:0 2px 8px rgba(100,70,40,0.12)}
+
+/* 右侧列表 */
+.layout{display:flex;gap:24px;align-items:flex-start}
+.layout .left{flex:1;min-width:0}
+.sidebar{width:280px;flex-shrink:0;position:sticky;top:70px}
+.sidebar-card{background:var(--card-bg);border-radius:14px;box-shadow:0 4px 20px rgba(100,70,40,0.08);border:1px solid rgba(184,131,58,0.12);overflow:hidden;margin-bottom:16px}
+.sidebar-card .sc-title{padding:12px 16px;font-size:13px;letter-spacing:3px;font-weight:600;border-bottom:1px solid rgba(184,131,58,0.1);display:flex;align-items:center;gap:8px}
+.sidebar-card .sc-title .ico{font-size:16px}
+.sidebar-card .sc-body{padding:12px 16px;max-height:360px;overflow-y:auto}
+.sc-item{padding:8px 0;border-bottom:1px solid rgba(184,131,58,0.06);display:flex;align-items:center;gap:10px}
+.sc-item:last-child{border-bottom:none}
+.sc-item .sc-date{font-size:11px;color:var(--text-light);white-space:nowrap;min-width:50px}
+.sc-item .sc-name{font-size:13px;font-weight:600;flex:1}
+.sc-item .sc-badge{font-size:9px;padding:2px 6px;border-radius:6px;letter-spacing:1px}
+.sc-badge.birthday{background:var(--male-light);color:#4a6e84}
+.sc-badge.memorial{background:rgba(139,46,46,0.08);color:var(--accent)}
+.sc-item.female .sc-badge.birthday{background:var(--female-light);color:#7a4a5a}
+
+/* 空状态 */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-light)}
+.empty-state .ico{font-size:48px;opacity:0.2;margin-bottom:12px}
+.empty-state p{font-size:13px;letter-spacing:1px;line-height:1.8}
+
+/* 弹窗 */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(60,40,20,0.3);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.show{opacity:1;pointer-events:auto}
+.modal-box{background:#faf6ee;border-radius:16px;box-shadow:0 12px 48px rgba(60,40,20,0.2);max-width:380px;width:90%;overflow:hidden;transform:scale(0.92);transition:transform .25s}
+.modal-overlay.show .modal-box{transform:scale(1)}
+.modal-header{padding:16px 20px;border-bottom:1px solid rgba(184,131,58,0.12);display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-size:14px;letter-spacing:3px;color:var(--text)}
+.modal-close{width:28px;height:28px;border-radius:50%;border:1px solid rgba(184,131,58,0.2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-light);transition:all .2s}
+.modal-close:hover{background:rgba(184,131,58,0.1);color:var(--text)}
+.modal-body{padding:20px}
+.modal-body .mb-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid rgba(184,131,58,0.06)}
+.modal-body .mb-row:last-child{border-bottom:none}
+.modal-body .mb-label{font-size:11px;color:var(--text-light);letter-spacing:1px;min-width:60px}
+.modal-body .mb-val{font-size:14px;font-weight:600;flex:1}
+.modal-body .mb-val.male{color:#4a6e84}
+.modal-body .mb-val.female{color:#7a4a5a}
+
+/* 图例 */
+.legend{display:flex;gap:16px;justify-content:center;margin-bottom:20px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-light);letter-spacing:0.5px}
+.legend-dot{width:12px;height:6px;border-radius:3px}
+.legend-dot.bm{background:var(--male);border-left:2px solid var(--male)}
+.legend-dot.bf{background:var(--female);border-left:2px solid var(--female)}
+.legend-dot.dm{background:rgba(139,46,46,0.2);border-left:2px solid var(--accent)}
+.legend-dot.df{background:rgba(139,46,46,0.2);border-left:2px solid var(--accent)}
+
+@media(max-width:768px){
+  .layout{flex-direction:column}
+  .sidebar{width:100%;position:static}
+  .cal-cell{min-height:60px;padding:2px 3px}
+  .event-tag{font-size:9px;padding:1px 4px}
+  .cal-cell .day-num{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1><span class="seal">程</span>生辰忌辰</h1>
+  <div class="topbar-actions">
+    <a href="index.html" class="back-link">← 返回族谱</a>
+  </div>
+</div>
+
+<div class="content">
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot bm"></span>生辰（男）</span>
+    <span class="legend-item"><span class="legend-dot bf"></span>生辰（女）</span>
+    <span class="legend-item"><span class="legend-dot dm"></span>忌辰</span>
+  </div>
+
+  <div class="month-nav">
+    <button class="arrow" onclick="prevMonth()">‹</button>
+    <div>
+      <div class="month-label" id="monthLabel"></div>
+      <div class="year-label" id="yearLabel"></div>
+    </div>
+    <button class="arrow" onclick="nextMonth()">›</button>
+  </div>
+
+  <div class="layout">
+    <div class="left">
+      <div class="calendar">
+        <div class="cal-header">
+          <div class="hd sun">日</div><div class="hd">一</div><div class="hd">二</div><div class="hd">三</div><div class="hd">四</div><div class="hd">五</div><div class="hd">六</div>
+        </div>
+        <div class="cal-body" id="calBody"></div>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-card">
+        <div class="sc-title"><span class="ico">🎂</span> 本月生辰</div>
+        <div class="sc-body" id="birthList"></div>
+      </div>
+      <div class="sidebar-card">
+        <div class="sc-title"><span class="ico">🕯️</span> 本月忌辰</div>
+        <div class="sc-body" id="deathList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 详情弹窗 -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modalTitle">详情</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+var DEFAULT_DATA = {"familyName":"程","people":[{"id":"p1","name":"程礼信","gender":"male","birth":"1808","death":"1877","residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"始祖","parentId":null},{"id":"p2","name":"程德瑞","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"田庆英","photo":"","notes":"配田庆英，张庄","parentId":"p1"},{"id":"p3","name":"田庆英","gender":"female","birth":"","death":null,"residence":"张庄","occupation":"","contact":"","spouse":"程德瑞","photo":"","notes":"","parentId":null},{"id":"p4","name":"程全水","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"宋传英","photo":"","notes":"入山","parentId":"p2"},{"id":"p5","name":"宋传英","gender":"female","birth":"","death":null,"residence":"凡山","occupation":"","contact":"","spouse":"程全水","photo":"","notes":"","parentId":null},{"id":"p6","name":"程计龙","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p4"},{"id":"p7","name":"程广胜","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p6"},{"id":"p8","name":"程召坤","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p7"},{"id":"p9","name":"程飞扬","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p8"},{"id":"p10","name":"程召波","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p7"},{"id":"p11","name":"程泽琪","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p10"},{"id":"p12","name":"程广利","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p6"},{"id":"p13","name":"程琳","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p12"},{"id":"p14","name":"程文奥","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p12"},{"id":"p15","name":"程广巧","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p6"},{"id":"p16","name":"程广凤","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p6"},{"id":"p17","name":"程计忠","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p4"},{"id":"p18","name":"程计明","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p4"},{"id":"p19","name":"程广志","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p18"},{"id":"p20","name":"程文倩","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p19"},{"id":"p21","name":"程雪瑶","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p19"},{"id":"p22","name":"程悦悦","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p19"},{"id":"p23","name":"程广惠","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p18"},{"id":"p24","name":"程召涵","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p23"},{"id":"p25","name":"程冰源","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p23"},{"id":"p26","name":"程广娥","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p18"},{"id":"p27","name":"程计雨","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"15069751490","spouse":"鲁恒英","photo":"","notes":"","parentId":"p4"},{"id":"p28","name":"程广良","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p27"},{"id":"p29","name":"程召硕","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p28"},{"id":"p30","name":"程召儒","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p28"},{"id":"p31","name":"程广琴","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p27"},{"id":"p32","name":"程计雪","gender":"male","birth":"1986-02-21","death":null,"residence":"港中旅·海泉湾一期，河北廊坊三河思菩兰路","occupation":"","contact":"18518558036","spouse":"李莉","photo":"","notes":"","parentId":"p4"},{"id":"p33","name":"程广花","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p32"},{"id":"p34","name":"程广美","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p32"},{"id":"p35","name":"chang","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p34"},{"id":"p36","name":"程广超","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p32"},{"id":"p37","name":"程星野","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p36"},{"id":"p38","name":"张在明","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"程继英","photo":"","notes":"女婿","parentId":null},{"id":"p39","name":"程继英","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"张在明","photo":"","notes":"","parentId":"p4"},{"id":"p40","name":"张承美","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p39"},{"id":"p41","name":"张宏","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p39"},{"id":"p42","name":"张成斌","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"郑美容","photo":"","notes":"","parentId":"p39"},{"id":"p43","name":"郑美容","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"张成斌","photo":"","notes":"","parentId":null},{"id":"p44","name":"张亚茹","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p42"},{"id":"p45","name":"张学金","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p42"},{"id":"p46","name":"张呈祥","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"王宝英","photo":"","notes":"","parentId":"p39"},{"id":"p47","name":"王宝英","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"张呈祥","photo":"","notes":"","parentId":null},{"id":"p48","name":"张学宁","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p46"},{"id":"p49","name":"李善春","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"程继平","photo":"","notes":"女婿","parentId":null},{"id":"p50","name":"程继平","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"李善春","photo":"","notes":"","parentId":"p4"},{"id":"p51","name":"李强","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"闫亚丽","photo":"","notes":"","parentId":"p50"},{"id":"p52","name":"闫亚丽","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"李强","photo":"","notes":"","parentId":null},{"id":"p53","name":"李雪原","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p51"},{"id":"p54","name":"李猛","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"刘红萍","photo":"","notes":"","parentId":"p50"},{"id":"p55","name":"刘红萍","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"李猛","photo":"","notes":"","parentId":null},{"id":"p56","name":"李雪峰","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p54"},{"id":"p57","name":"孙女","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p56"},{"id":"p58","name":"李杰","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"管士霞","photo":"","notes":"","parentId":"p50"},{"id":"p59","name":"管士霞","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":"李杰","photo":"","notes":"","parentId":null},{"id":"p60","name":"李雪飞","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p58"},{"id":"p61","name":"李华","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p50"},{"id":"p62","name":"程全","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p2"},{"id":"p63","name":"程全","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p2"},{"id":"p64","name":"程德海","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p1"},{"id":"p65","name":"程全胜","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p64"},{"id":"p66","name":"程计亮","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p65"},{"id":"p67","name":"程广水","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p66"},{"id":"p68","name":"程","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p67"},{"id":"p69","name":"程","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p67"},{"id":"p70","name":"程广丽","gender":"female","birth":"","death":null,"residence":"济宁","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p66"},{"id":"p71","name":"程计堂","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p65"},{"id":"p72","name":"程晋","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p71"},{"id":"p73","name":"程","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p72"},{"id":"p74","name":"程","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p72"},{"id":"p75","name":"程广玉","gender":"male","birth":"","death":null,"residence":"旺山","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p71"},{"id":"p76","name":"程计清","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p65"},{"id":"p77","name":"程广营","gender":"male","birth":"","death":null,"residence":"国营","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p76"},{"id":"p78","name":"程","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p77"},{"id":"p79","name":"程","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p77"},{"id":"p80","name":"程广秋","gender":"male","birth":"","death":null,"residence":"亚秋","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p76"},{"id":"p81","name":"程计礼","gender":"male","birth":"","death":null,"residence":"全子","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p65"},{"id":"p82","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p81"},{"id":"p83","name":"程计苹","gender":"male","birth":"","death":null,"residence":"金苹","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p65"},{"id":"p84","name":"程计英","gender":"female","birth":"","death":null,"residence":"金英","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p65"},{"id":"p85","name":"程全庆","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p64"},{"id":"p86","name":"程计春","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p85"},{"id":"p87","name":"程俊豪","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p86"},{"id":"p88","name":"程计伟","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p85"},{"id":"p89","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p88"},{"id":"p90","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p88"},{"id":"p91","name":"程计梅","gender":"female","birth":"","death":null,"residence":"济宁","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p85"},{"id":"p92","name":"程全功","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p64"},{"id":"p93","name":"程详","gender":"male","birth":"","death":null,"residence":"新闻","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p92"},{"id":"p94","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p93"},{"id":"p95","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p93"},{"id":"p96","name":"程计苹","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p92"},{"id":"p97","name":"程德富","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p1"},{"id":"p98","name":"程全仁","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p97"},{"id":"p99","name":"程计发","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p98"},{"id":"p100","name":"程广芝","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p99"},{"id":"p101","name":"程秀兰","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p99"},{"id":"p102","name":"程计顺","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p98"},{"id":"p103","name":"程飞龙","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p102"},{"id":"p104","name":"程全新","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p97"},{"id":"p105","name":"程计河","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p104"},{"id":"p106","name":"程计江","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p104"},{"id":"p107","name":"程广甲，秦敏莉","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p106"},{"id":"p108","name":"程允腾","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p107"},{"id":"p109","name":"程小溪","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p107"},{"id":"p110","name":"程慧，姜传同","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p106"},{"id":"p111","name":"姜凯闻","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p110"},{"id":"p112","name":"程计田","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p104"},{"id":"p113","name":"程计","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p104"},{"id":"p114","name":"程全荣","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p97"},{"id":"p115","name":"程计斌","gender":"male","birth":"","death":null,"residence":"雪子","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p114"},{"id":"p116","name":"程广大","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p115"},{"id":"p117","name":"程计雨","gender":"male","birth":"","death":null,"residence":"年子","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p114"},{"id":"p118","name":"程计","gender":"male","birth":"","death":null,"residence":"美子","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p114"},{"id":"p119","name":"程全义","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p97"},{"id":"p120","name":"程计坤","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p119"},{"id":"p121","name":"程广利国利","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p120"},{"id":"p122","name":"程广东东东","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p120"},{"id":"p123","name":"程计乾","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p119"},{"id":"p124","name":"程广学","gender":"male","birth":"","death":null,"residence":"鲁宁","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p123"},{"id":"p125","name":"程全银","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p97"},{"id":"p126","name":"程计华","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p125"},{"id":"p127","name":"程广","gender":"male","birth":"","death":null,"residence":"书宁","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p126"},{"id":"p128","name":"程广","gender":"male","birth":"","death":null,"residence":"书奇","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p126"},{"id":"p129","name":"程计春","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p125"},{"id":"p130","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p129"},{"id":"p131","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p129"},{"id":"p132","name":"程计贵","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p125"},{"id":"p133","name":"程广","gender":"male","birth":"","death":null,"residence":"书同","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p132"},{"id":"p134","name":"程广","gender":"male","birth":"","death":null,"residence":"书恒","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p132"},{"id":"p135","name":"程计云","gender":"female","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p125"},{"id":"p136","name":"程德友","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p1"},{"id":"p137","name":"程全龙","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p136"},{"id":"p138","name":"程计军","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p137"},{"id":"p139","name":"程俊豪","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p138"},{"id":"p140","name":"程计超","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p137"},{"id":"p141","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p140"},{"id":"p142","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p140"},{"id":"p143","name":"程广","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p140"},{"id":"p144","name":"程计","gender":"male","birth":"","death":null,"residence":"","occupation":"","contact":"","spouse":null,"photo":"","notes":"","parentId":"p137"}]};
+
+var familyData = JSON.parse(localStorage.getItem('cheng_family_tree_v6')) || DEFAULT_DATA;
+var curYear, curMonth;
+
+function parseDate(str) {
+  if (!str) return null;
+  // Handle formats: "1986-02-21", "1986-2-21", "1808", "1986-02-21(农历)"
+  str = str.replace(/（农历）|\(农历\)/g, '').trim();
+  var parts = str.split('-');
+  if (parts.length >= 3) {
+    return { y: parseInt(parts[0]), m: parseInt(parts[1]), d: parseInt(parts[2]) };
+  } else if (parts.length === 2) {
+    return { y: parseInt(parts[0]), m: parseInt(parts[1]), d: null };
+  } else if (parts.length === 1 && parts[0].length >= 4) {
+    return { y: parseInt(parts[0]), m: null, d: null };
+  }
+  return null;
+}
+
+function getEvents(people) {
+  var births = [];
+  var deaths = [];
+  for (var i = 0; i < people.length; i++) {
+    var p = people[i];
+    if (p.birth) {
+      var bd = parseDate(p.birth);
+      if (bd) births.push({ person: p, date: bd, raw: p.birth });
+    }
+    if (p.death) {
+      var dd = parseDate(p.death);
+      if (dd) deaths.push({ person: p, date: dd, raw: p.death });
+    }
+  }
+  return { births: births, deaths: deaths };
+}
+
+var events = getEvents(familyData.people);
+
+function render() {
+  var monthNames = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+  document.getElementById('monthLabel').textContent = monthNames[curMonth];
+  document.getElementById('yearLabel').textContent = curYear + '年';
+
+  var firstDay = new Date(curYear, curMonth, 1).getDay();
+  var daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+  var daysInPrev = new Date(curYear, curMonth, 0).getDate();
+
+  var today = new Date();
+  var todayY = today.getFullYear(), todayM = today.getMonth(), todayD = today.getDate();
+
+  var html = '';
+  var cellCount = 0;
+
+  // Previous month trailing days
+  for (var i = firstDay - 1; i >= 0; i--) {
+    var d = daysInPrev - i;
+    html += '<div class="cal-cell other-month"><span class="day-num">' + d + '</span></div>';
+    cellCount++;
+  }
+
+  // Current month days
+  for (var day = 1; day <= daysInMonth; day++) {
+    var isToday = (curYear === todayY && curMonth === todayM && day === todayD);
+    var isSun = (cellCount % 7 === 0);
+    var cls = 'cal-cell' + (isToday ? ' today' : '');
+
+    var dayEvents = '';
+    // Births
+    for (var b = 0; b < events.births.length; b++) {
+      var ev = events.births[b];
+      if (ev.date.m === curMonth + 1 && ev.date.d === day) {
+        var g = ev.person.gender === 'female' ? 'birth-female' : 'birth-male';
+        dayEvents += '<div class="event-tag ' + g + '" onclick="showDetail(\'' + ev.person.id + '\',\'birth\')">' + ev.person.name + '</div>';
+      }
+    }
+    // Deaths
+    for (var d2 = 0; d2 < events.deaths.length; d2++) {
+      var ev2 = events.deaths[d2];
+      if (ev2.date.m === curMonth + 1 && ev2.date.d === day) {
+        var g2 = ev2.person.gender === 'female' ? 'death-female' : 'death-male';
+        dayEvents += '<div class="event-tag ' + g2 + '" onclick="showDetail(\'' + ev2.person.id + '\',\'death\')">' + ev2.person.name + '</div>';
+      }
+    }
+
+    html += '<div class="' + cls + '">' +
+      '<span class="day-num' + (isSun ? ' sun' : '') + '">' + day + '</span>' +
+      '<div class="events">' + dayEvents + '</div>' +
+      '</div>';
+    cellCount++;
+  }
+
+  // Next month leading days
+  var remaining = cellCount % 7 === 0 ? 0 : 7 - (cellCount % 7);
+  for (var i = 1; i <= remaining; i++) {
+    html += '<div class="cal-cell other-month"><span class="day-num">' + i + '</span></div>';
+  }
+
+  document.getElementById('calBody').innerHTML = html;
+
+  // Sidebar: this month's events
+  renderSidebar();
+}
+
+function renderSidebar() {
+  var birthHtml = '';
+  var deathHtml = '';
+  var hasBirth = false, hasDeath = false;
+
+  for (var b = 0; b < events.births.length; b++) {
+    var ev = events.births[b];
+    if (ev.date.m === curMonth + 1) {
+      hasBirth = true;
+      var dateStr = (ev.date.d ? ev.date.d + '日' : '');
+      var fCls = ev.person.gender === 'female' ? ' female' : '';
+      birthHtml += '<div class="sc-item' + fCls + '" onclick="showDetail(\'' + ev.person.id + '\',\'birth\')">' +
+        '<span class="sc-date">' + dateStr + '</span>' +
+        '<span class="sc-name">' + ev.person.name + '</span>' +
+        '<span class="sc-badge birthday">生辰</span></div>';
+    }
+  }
+
+  for (var d = 0; d < events.deaths.length; d++) {
+    var ev = events.deaths[d];
+    if (ev.date.m === curMonth + 1) {
+      hasDeath = true;
+      var dateStr2 = (ev.date.d ? ev.date.d + '日' : '');
+      deathHtml += '<div class="sc-item" onclick="showDetail(\'' + ev.person.id + '\',\'death\')">' +
+        '<span class="sc-date">' + dateStr2 + '</span>' +
+        '<span class="sc-name">' + ev.person.name + '</span>' +
+        '<span class="sc-badge memorial">忌辰</span></div>';
+    }
+  }
+
+  document.getElementById('birthList').innerHTML = hasBirth ? birthHtml : '<div style="text-align:center;color:var(--text-light);font-size:12px;padding:16px 0">暂无记录</div>';
+  document.getElementById('deathList').innerHTML = hasDeath ? deathHtml : '<div style="text-align:center;color:var(--text-light);font-size:12px;padding:16px 0">暂无记录</div>';
+}
+
+function showDetail(id, type) {
+  var person = null;
+  for (var i = 0; i < familyData.people.length; i++) {
+    if (familyData.people[i].id === id) { person = familyData.people[i]; break; }
+  }
+  if (!person) return;
+
+  var title = type === 'birth' ? '🎂 生辰' : '🕯️ 忌辰';
+  document.getElementById('modalTitle').textContent = title;
+
+  var gText = person.gender === 'female' ? '女' : '男';
+  var gCls = person.gender === 'female' ? 'female' : 'male';
+  var dateVal = type === 'birth' ? (person.birth || '—') : (person.death || '—');
+
+  var html = '<div class="mb-row"><span class="mb-label">姓名</span><span class="mb-val ' + gCls + '">' + person.name + '</span></div>';
+  html += '<div class="mb-row"><span class="mb-label">性别</span><span class="mb-val">' + gText + '</span></div>';
+  html += '<div class="mb-row"><span class="mb-label">' + (type === 'birth' ? '出生' : '逝世') + '</span><span class="mb-val">' + dateVal + '</span></div>';
+  if (person.spouse) {
+    html += '<div class="mb-row"><span class="mb-label">配偶</span><span class="mb-val">' + person.spouse + '</span></div>';
+  }
+  if (person.residence) {
+    html += '<div class="mb-row"><span class="mb-label">现居</span><span class="mb-val">' + person.residence + '</span></div>';
+  }
+
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+function prevMonth() {
+  curMonth--;
+  if (curMonth < 0) { curMonth = 11; curYear--; }
+  render();
+}
+
+function nextMonth() {
+  curMonth++;
+  if (curMonth > 11) { curMonth = 0; curYear++; }
+  render();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowLeft') prevMonth();
+  if (e.key === 'ArrowRight') nextMonth();
+});
+
+var now = new Date();
+curYear = now.getFullYear();
+curMonth = now.getMonth();
+render();
+</script>
+</body>
+</html>
